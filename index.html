@@ -1,16 +1,20 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Andrei Pinter · Dashboards</title>
+<title>Supply Chain Tools · Andrei Pinter</title>
 <style>
 :root{--bg:#F2F5F7;--card:#fff;--ink:#13202E;--ink2:#4A5A6A;--rule:#CCD6DF;--acc:#0E7C74}
 @media (prefers-color-scheme:dark){:root{--bg:#10171E;--card:#18222C;--ink:#E4EAF0;--ink2:#9AAAB9;--rule:#2E3C49;--acc:#3FB8AD}}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:760px;margin:0 auto;padding:48px 16px}
-h1{font-size:28px;margin:0 0 24px}
+h1{font-size:28px;margin:0 0 6px} p.lede{color:var(--ink2);margin:0 0 24px}
 a.card{display:block;background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin-bottom:12px;color:inherit;text-decoration:none}
 a.card:hover{border-color:var(--acc)} a.card b{color:var(--acc)} a.card span{display:block;color:var(--ink2);font-size:14px}
 </style></head><body><main>
-<h1>Dashboards</h1>
-<a class="card" href="capacity/"><b>Capacity &amp; cost model</b><span>Work-center load, overtime and unit cost for a 15-month plan. Horizon rolls forward monthly.</span></a>
-<a class="card" href="hiring/"><b>Hiring command center</b><span>Live postings daily, BLS labor-market numbers weekly.</span></a>
-</main></body></html>
+<h1>Supply chain tools</h1>
+<p class="lede">Planning and scheduling models built on synthetic sample data.</p>
+<a class="card" href="supply-planner/" id="sp"><b>Supply planner</b><span>Demand, inventory cover and replenishment exceptions by SKU.</span></a>
+<a class="card" href="capacity/"><b>Capacity &amp; cost model</b><span>Work-center load, overtime and unit cost over a 15-month plan. Horizon rolls forward monthly.</span></a>
+<a class="card" href="scheduler/"><b>Production scheduler</b><span>Finite-capacity schedule for every work order, resource and shift, with exceptions and dispatch lists.</span></a>
+</main>
+<script>fetch('supply-planner/',{method:'HEAD'}).then(r=>{if(!r.ok)document.getElementById('sp').remove()}).catch(()=>document.getElementById('sp').remove());</script>
+</body></html>

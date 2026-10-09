@@ -1,21 +1,15 @@
-name: Refresh dashboards
+name: Refresh supply chain tools
 
-# Same pattern as PulseNews: refresh data, commit it, publish to GitHub Pages.
-# Times are UTC. 11:43 UTC is ~6:43 AM Central (5:43 AM in winter).
-#   - every run: Hiring live postings (Adzuna) + Capacity horizon roll (no-op unless a new month started)
-#   - Mondays or manual runs: Hiring weekly benchmarks (BLS) and the "what changed" log
+# Daily 11:37 UTC (~6:37 AM Central). Each tool's refresh step is a no-op when nothing is due.
+#   capacity/   plan horizon rolls to the current month
+#   scheduler/  static for now (engine not yet in this repo)
+#   supply-planner/  plan rolls to the current month
 on:
   schedule:
-    - cron: "43 11 * * *"
+    - cron: "37 11 * * *"
   workflow_dispatch:
-    inputs:
-      weekly:
-        description: "Also run the weekly BLS refresh"
-        type: boolean
-        default: true
   push:
     branches: [main]
-    paths: ["capacity/**", "hiring/**", "index.html", "scripts/**", ".github/workflows/refresh.yml"]
 
 permissions:
   contents: write
@@ -23,55 +17,40 @@ permissions:
   id-token: write
 
 concurrency:
-  group: dashboards-refresh
+  group: supply-chain-refresh
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Capacity - roll plan horizon to the current month
+      - name: Capacity model - roll plan horizon
         if: github.event_name != 'push'
         run: python scripts/roll_capacity.py
 
-      - name: Hiring - live postings
+      - name: Supply planner - roll plan to the current month
         if: github.event_name != 'push'
-        continue-on-error: true
-        env:
-          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
-          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
-        run: python scripts/refresh_hiring.py live
-
-      - name: Is it Monday?
-        id: day
-        run: echo "dow=$(date -u +%u)" >> "$GITHUB_OUTPUT"
-
-      - name: Hiring - weekly BLS benchmarks
-        if: (github.event_name == 'schedule' && steps.day.outputs.dow == '1') || (github.event_name == 'workflow_dispatch' && inputs.weekly)
-        continue-on-error: true
-        env:
-          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
-        run: python scripts/refresh_hiring.py weekly
+        run: python scripts/roll_supply.py
 
       - name: Commit refreshed data
         if: github.event_name != 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add capacity/index.html hiring/data.json
+          git add -A capacity scheduler supply-planner
           git diff --cached --quiet || (git commit -m "Refresh $(date -u +%F)" && git push)
 
       - name: Stage site
         run: |
           mkdir -p _site
-          cp -r index.html .nojekyll capacity hiring _site/
+          cp index.html .nojekyll _site/
+          for d in capacity scheduler supply-planner; do [ -d "$d" ] && cp -r "$d" _site/ || true; done
           [ -f CNAME ] && cp CNAME _site/ || true
 
       - uses: actions/configure-pages@v5
