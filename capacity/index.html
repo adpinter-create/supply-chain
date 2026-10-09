@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Capacity &amp; cost model, sample data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F5F7; --surface:#FFFFFF; --ink:#13202E; --ink-2:#4A5A6A; --rule:#CCD6DF; --rule-2:#E3E9EE;
+  --plan:#0E7C74; --plan-soft:#D5EDEA; --risk:#B42318; --risk-soft:#FBE3E0; --warn:#A15C07; --warn-soft:#FCEFD9; --hot:#D9480F; --hot-soft:#FFE0CC;
+  --c0:#1F4E79; --c1:#0E7C74; --c2:#B7791F; --c3:#6B4FA0; --c4:#8A3B52; --c5:#3F7F3A; --c6:#4F6D8F; --c7:#9C6B2F; --c8:#2F6F8F; --c9:#7A5C7A;
+  --k-mat:#9AA9B8; --k-cm:#C7B28A; --k-lab:#0E7C74; --k-ot:#D9480F; --k-sub:#B42318; --k-voh:#6B4FA0; --k-fix:#1F4E79; --k-car:#B7791F;
+  --radius:6px;
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif; color:var(--ink); background:var(--paper);
+  font-variant-numeric:tabular-nums; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#10171E; --surface:#18222C; --ink:#E4EAF0; --ink-2:#9AAAB9; --rule:#2E3C49; --rule-2:#223039;
+  --plan:#3FB8AD; --plan-soft:#173A38; --risk:#F07A6E; --risk-soft:#3B1D1B; --warn:#E6A547; --warn-soft:#3A2B14; --hot:#F2894E; --hot-soft:#40240F;
+  --c0:#6C9BD2; --c1:#3FB8AD; --c2:#E0A548; --c3:#A58BD6; --c4:#D07A95; --c5:#7FBF73; --c6:#8FA9C8; --c7:#CFA06A; --c8:#6FB3D2; --c9:#BE9BBE;
+  --k-mat:#5E6E7E; --k-cm:#8C7A55; --k-lab:#3FB8AD; --k-ot:#F2894E; --k-sub:#F07A6E; --k-voh:#A58BD6; --k-fix:#6C9BD2; --k-car:#E0A548;}}
+:root[data-theme="dark"]{
+  --paper:#10171E; --surface:#18222C; --ink:#E4EAF0; --ink-2:#9AAAB9; --rule:#2E3C49; --rule-2:#223039;
+  --plan:#3FB8AD; --plan-soft:#173A38; --risk:#F07A6E; --risk-soft:#3B1D1B; --warn:#E6A547; --warn-soft:#3A2B14; --hot:#F2894E; --hot-soft:#40240F;
+  --c0:#6C9BD2; --c1:#3FB8AD; --c2:#E0A548; --c3:#A58BD6; --c4:#D07A95; --c5:#7FBF73; --c6:#8FA9C8; --c7:#CFA06A; --c8:#6FB3D2; --c9:#BE9BBE;
+  --k-mat:#5E6E7E; --k-cm:#8C7A55; --k-lab:#3FB8AD; --k-ot:#F2894E; --k-sub:#F07A6E; --k-voh:#A58BD6; --k-fix:#6C9BD2; --k-car:#E0A548;}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--paper)}
+body{font-size:15px;line-height:1.45}
+button,input,select{font:inherit;color:inherit;box-sizing:border-box}
+:focus-visible{outline:2px solid var(--plan);outline-offset:2px}
+.wrap{max-width:1440px;margin:0 auto;padding:20px 20px 56px;overflow-x:hidden}
+header.top{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between;padding-bottom:18px;border-bottom:2px solid var(--ink)}
+.title h1{margin:0;font-stretch:78%;font-weight:800;font-size:clamp(28px,4vw,44px);line-height:1;letter-spacing:-.01em}
+.title p{margin:8px 0 0;color:var(--ink-2);max-width:66ch}
+.asof{display:inline-block;margin-top:10px;font-size:13px;color:var(--ink-2)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--rule);background:var(--surface);border-radius:var(--radius);padding:7px 12px;cursor:pointer;font-size:14px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--plan);border-color:var(--plan);color:#fff}
+.btn.small{padding:4px 9px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:default}
+select.in,input.in{border:1px solid var(--rule);background:var(--surface);border-radius:var(--radius);padding:6px 8px;font-size:14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:6px 11px;cursor:pointer;font-size:13.5px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px;margin-top:18px;align-items:start}
+@media (max-width:1080px){.layout{grid-template-columns:minmax(0,1fr)}}
+aside.rail{position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto;background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius)}
+@media (max-width:1080px){aside.rail{position:static;max-height:none}}
+.rail-head{padding:12px 14px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rail-head b{font-size:15px}
+.rail-head .dirty{font-size:12px;color:var(--warn)}
+details.grp{border-bottom:1px solid var(--rule-2)}
+details.grp summary{cursor:pointer;padding:11px 14px;font-weight:650;font-size:14.5px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.grp summary::-webkit-details-marker{display:none}
+details.grp summary::after{content:"+";color:var(--ink-2);font-weight:400;font-size:18px}
+details.grp[open] summary::after{content:"–"}
+details.grp summary .chg{font-size:11.5px;font-weight:600;color:var(--warn);margin-left:auto;margin-right:10px}
+.grp .body{padding:2px 14px 14px}
+.field{margin:10px 0}
+.field label{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--ink-2);margin-bottom:4px}
+.field label output{color:var(--ink);font-weight:600}
+.field input[type=range]{width:100%;accent-color:var(--plan)}
+.field select,.field input[type=number]{width:100%}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.row2>*{min-width:0}
+.field select,.field input{max-width:100%;min-width:0}
+.help{font-size:12px;color:var(--ink-2);margin:4px 0 0;line-height:1.35}
+.custom12{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:6px}
+.custom12 label{display:flex;flex-direction:column;font-size:10.5px;color:var(--ink-2);text-align:center;margin:0}
+.custom12 input{width:100%;border:1px solid var(--rule);border-radius:4px;padding:3px;text-align:center;font-size:12px;background:var(--surface)}
+.spark{width:100%;height:46px;margin-top:6px;display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule);background:var(--surface);border-radius:var(--radius)}
+.kpi{padding:13px 15px;border-left:1px solid var(--rule-2);border-top:1px solid var(--rule-2)}
+.kpi:nth-child(4n+1){border-left:0}
+.kpi:nth-child(-n+4){border-top:0}
+.kpi .v{font-size:23px;font-weight:700;font-stretch:85%;line-height:1.1}
+.kpi .l{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.kpi .d{font-size:12px;margin-top:3px;color:var(--ink-2)}
+.kpi .d.up{color:var(--risk)} .kpi .d.dn{color:var(--plan)} .kpi .d.upg{color:var(--plan)} .kpi .d.dnb{color:var(--risk)}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{border-left:1px solid var(--rule-2)!important;border-top:1px solid var(--rule-2)!important}.kpi:nth-child(odd){border-left:0!important}.kpi:nth-child(-n+2){border-top:0!important}}
+nav.tabs{display:flex;gap:2px;margin:16px 0 0;overflow-x:auto;border-bottom:1px solid var(--rule)}
+nav.tabs button{border:0;background:transparent;padding:10px 13px;font-size:15px;cursor:pointer;border-bottom:3px solid transparent;color:var(--ink-2);white-space:nowrap;margin-bottom:-1px}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--plan);font-weight:650}
+section.view{display:none}
+section.view.on{display:block}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:16px;margin-top:16px}
+.panel h2{margin:0 0 4px;font-size:18px;font-stretch:88%;font-weight:700}
+.panel .sub{margin:0 0 12px;color:var(--ink-2);font-size:14px;max-width:80ch}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:1180px){.two{grid-template-columns:minmax(0,1fr)}}
+.phead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;margin:0 0 8px;color:var(--ink-2)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px}
+.sw.line{height:3px;width:16px}
+.sw.dash{height:0;width:16px;border-top:2px dashed var(--ink);background:none!important}
+.chart{width:100%;display:block}
+.chart text{fill:var(--ink-2);font-size:11px}
+.chart .grid{stroke:var(--rule-2)}
+.chart .axis{stroke:var(--rule)}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--paper);padding:8px 10px;border-radius:4px;font-size:13px;z-index:30;display:none;max-width:300px;line-height:1.4}
+.tip table{border-collapse:collapse;width:auto;font-size:13px}.tip td{padding:0 0 0 12px;text-align:right;border:0;color:inherit}.tip td:first-child{padding-left:0;text-align:left}
+.scroll-x{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--rule-2);white-space:nowrap}
+th{font-weight:600;color:var(--ink-2);background:var(--surface);position:sticky;top:0;z-index:1}
+th.l,td.l{text-align:left}
+tr.tot td{font-weight:700;border-top:1px solid var(--rule)}
+th[data-sort]{cursor:pointer}
+th.asc::after{content:" ▲";font-size:9px} th.desc::after{content:" ▼";font-size:9px}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover td{background:color-mix(in srgb,var(--plan) 7%,transparent)}
+tbody tr.sel td{background:var(--plan-soft)}
+.heat td.cell{cursor:pointer;font-size:12.5px;min-width:52px}
+.heat td.cell.sel{outline:2px solid var(--ink);outline-offset:-2px}
+.u0{background:color-mix(in srgb,var(--plan) 12%,transparent)}
+.u1{background:color-mix(in srgb,var(--plan) 26%,transparent)}
+.u2{background:var(--warn-soft);color:var(--warn)}
+.u3{background:var(--hot-soft);color:var(--hot);font-weight:650}
+.u4{background:var(--risk-soft);color:var(--risk);font-weight:700}
+.badge{display:inline-block;padding:1px 7px;border-radius:99px;font-size:12px;font-weight:600}
+.badge.ok{background:var(--plan-soft);color:var(--plan)} .badge.warn{background:var(--warn-soft);color:var(--warn)} .badge.risk{background:var(--risk-soft);color:var(--risk)} .badge.mute{background:var(--rule-2);color:var(--ink-2)}
+.edit input,.edit select{width:66px;border:1px solid var(--rule);border-radius:4px;padding:4px 5px;text-align:right;font-size:13px;background:var(--surface)}
+.edit select{width:auto;text-align:left}
+.edit input.chg,.edit select.chg{border-color:var(--warn);background:var(--warn-soft)}
+.wcname{font-weight:650}
+.wcsub{display:block;font-size:12px;color:var(--ink-2);font-weight:400}
+.prodgrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1250px){.prodgrid{grid-template-columns:minmax(0,1fr)}}
+.plist{max-height:780px;overflow:auto;border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface)}
+.plist td .dim{display:block;font-size:12px;color:var(--ink-2);max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.plist th,.plist td{padding:7px 6px}
+.drawer{position:sticky;top:10px;margin-top:0}
+.stackbar{display:flex;height:16px;border-radius:3px;overflow:hidden;margin:8px 0 6px}
+.stackbar i{display:block;height:100%}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);margin:12px 0}
+.facts div{padding:8px 10px;border-left:1px solid var(--rule-2)} .facts div:first-child{border-left:0}
+.facts b{display:block;font-size:17px;font-stretch:88%} .facts span{font-size:12px;color:var(--ink-2)}
+@media (max-width:560px){.facts{grid-template-columns:repeat(2,1fr)}.facts div:nth-child(3){border-left:0}}
+.calc{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:8px 0}
+.calc label{font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:3px}
+.calc input{width:110px}
+.note{font-size:13px;color:var(--ink-2);margin:8px 0 0}
+.method{max-width:86ch}
+.method h3{font-size:16px;margin:18px 0 6px;font-stretch:90%}
+.method p,.method li{color:var(--ink-2)}
+.method code{font-size:13px;background:var(--rule-2);padding:1px 5px;border-radius:3px;color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:6px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="title">
+    <h1>Capacity &amp; cost model</h1>
+    <p>How many hours the demand plan needs at each work center, whether the plant can make it, and what each product costs to build. Change seasonality, labor rates, shifts and sourcing in the scenario inputs and every number updates.</p>
+    <span class="asof">Plan horizon <b id="horizon"></b>. All figures are synthetic sample data.</span>
+  </div>
+  <div class="tools">
+    <select class="in" id="preset" aria-label="Load a preset scenario"><option value="">Load a preset…</option></select>
+    <input class="in" id="scnName" value="My scenario" aria-label="Scenario name" style="width:150px">
+    <button class="btn primary" id="saveScn">Save scenario</button>
+    <button class="btn" id="resetScn">Reset to baseline</button>
+    <button class="btn" id="expMonthly">Export monthly (CSV)</button>
+    <button class="btn" id="expProducts">Export unit costs (CSV)</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="rail" aria-label="Scenario inputs">
+  <div class="rail-head"><b>Scenario inputs</b><span class="dirty" id="dirty"></span></div>
+  <details class="grp" open data-g="demand"><summary>Demand &amp; seasonality<span class="chg"></span></summary><div class="body">
+    <div class="field"><label for="profile">Seasonality profile</label>
+      <select class="in" id="profile" data-k="profile">
+        <option value="plan">As planned (from the demand plan)</option>
+        <option value="flat">Flat, no seasonality</option>
+        <option value="holiday">Holiday peak (Q4 heavy)</option>
+        <option value="bts">Back-to-school (Jul–Sep)</option>
+        <option value="qend">Enterprise quarter-end spikes</option>
+        <option value="custom">Custom monthly indices</option>
+      </select></div>
+    <svg class="spark" id="seasSpark" aria-hidden="true"></svg>
+    <div id="customBox" hidden><p class="help">Monthly index, 1.00 = average month. The model rescales so the horizon still averages 1.00.</p><div class="custom12" id="custom12"></div></div>
+    <div class="field"><label>Seasonal intensity <output data-o="intensity"></output></label><input type="range" min="0" max="2" step="0.05" data-k="intensity"><p class="help">0% flattens the profile, 100% applies it as shown, 200% doubles the peaks and troughs.</p></div>
+    <div class="field"><label>Volume change vs plan <output data-o="growth"></output></label><input type="range" min="-40" max="60" step="1" data-k="growth"></div>
+    <div class="row2">
+      <div class="field"><label>Demand event</label><select class="in" data-k="evMonth" id="evMonth"></select></div>
+      <div class="field"><label>Event size %</label><input class="in" type="number" step="5" data-k="evPct"></div>
+    </div>
+    <p class="help">A one-month spike or drop, such as a launch or a large deal.</p>
+  </div></details>
+  <details class="grp" data-g="labor"><summary>Labor<span class="chg"></span></summary><div class="body">
+    <div class="row2">
+      <div class="field"><label>Wage increase %</label><input class="in" type="number" step="0.5" data-k="wageInc"></div>
+      <div class="field"><label>Effective</label><select class="in" data-k="wageEff" id="wageEff"></select></div>
+    </div>
+    <div class="field"><label>Benefits &amp; payroll burden <output data-o="burden"></output></label><input type="range" min="15" max="50" step="1" data-k="burden"></div>
+    <div class="row2">
+      <div class="field"><label>2nd shift premium %</label><input class="in" type="number" step="1" data-k="sd2"></div>
+      <div class="field"><label>3rd shift premium %</label><input class="in" type="number" step="1" data-k="sd3"></div>
+    </div>
+    <div class="field"><label>Overtime premium <output data-o="otPrem"></output></label><input type="range" min="25" max="100" step="5" data-k="otPrem"></div>
+    <div class="field"><label>Overtime limit, % of regular hours <output data-o="otCap"></output></label><input type="range" min="0" max="40" step="1" data-k="otCap"></div>
+    <div class="field"><label>Productivity gain per year <output data-o="prodGain"></output></label><input type="range" min="-5" max="12" step="0.5" data-k="prodGain"><p class="help">Learning curve and continuous improvement. Shrinks run times month by month.</p></div>
+    <div class="field"><label>Hours beyond overtime</label>
+      <select class="in" data-k="overflow"><option value="sub">Send to a subcontractor</option><option value="unmet">Leave unbuilt (lost sales)</option></select></div>
+    <div class="field" id="subMultBox"><label>Subcontract cost vs in-house <output data-o="subMult"></output></label><input type="range" min="1" max="3" step="0.05" data-k="subMult"></div>
+  </div></details>
+  <details class="grp" data-g="material"><summary>Materials &amp; sourcing<span class="chg"></span></summary><div class="body">
+    <div class="row2">
+      <div class="field"><label>Material inflation %</label><input class="in" type="number" step="0.5" data-k="matInfl"></div>
+      <div class="field"><label>Effective</label><select class="in" data-k="matEff" id="matEff"></select></div>
+    </div>
+    <div class="field"><label>Contract manufacturer price change %</label><input class="in" type="number" step="0.5" data-k="cmInfl"><p class="help">Applies to bought categories from the same month as material inflation.</p></div>
+    <div class="field"><label>Scrap &amp; yield loss <output data-o="scrap"></output></label><input type="range" min="0" max="8" step="0.1" data-k="scrap"></div>
+    <p class="help">Make-or-buy and bill-of-material cost by category are on the Setup tab.</p>
+  </div></details>
+  <details class="grp" data-g="ops"><summary>Operations<span class="chg"></span></summary><div class="body">
+    <div class="field"><label>Plant holidays per year <output data-o="holidays"></output></label><input type="range" min="0" max="20" step="1" data-k="holidays"></div>
+    <div class="field"><label>Production runs per product per month <output data-o="runs"></output></label><input type="range" min="1" max="8" step="1" data-k="runs"><p class="help">More runs mean smaller batches and more changeover hours.</p></div>
+    <div class="field"><label>Rework in assembly and test <output data-o="rework"></output></label><input type="range" min="0" max="10" step="0.5" data-k="rework"></div>
+    <div class="field"><label>Fixed overhead change <output data-o="fixAdj"></output></label><input type="range" min="-30" max="30" step="1" data-k="fixAdj"></div>
+    <p class="help">Stations, shifts, efficiency and labor rates for each work center are on the Setup tab.</p>
+  </div></details>
+  <details class="grp" data-g="strategy"><summary>Production strategy<span class="chg"></span></summary><div class="body">
+    <div class="field"><label>How to schedule production</label>
+      <select class="in" data-k="strategy">
+        <option value="chase">Chase: build what is needed each month</option>
+        <option value="level">Level: one steady monthly rate</option>
+        <option value="prebuild">Pre-build: move peak volume into earlier months</option>
+      </select></div>
+    <div class="field" id="windowBox"><label>Pre-build window <output data-o="window"></output></label><input type="range" min="1" max="6" step="1" data-k="window"></div>
+    <div class="field"><label>Inventory carrying cost per year <output data-o="carry"></output></label><input type="range" min="8" max="40" step="1" data-k="carry"><p class="help">Capital, storage, insurance and obsolescence on stock built ahead of demand.</p></div>
+  </div></details>
+</aside>
+
+<main>
+  <div class="kpis" id="kpis"></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-view="capacity" aria-selected="true">Capacity</button>
+    <button role="tab" data-view="cost" aria-selected="false">Cost</button>
+    <button role="tab" data-view="labor" aria-selected="false">Labor</button>
+    <button role="tab" data-view="products" aria-selected="false">Products</button>
+    <button role="tab" data-view="setup" aria-selected="false">Setup</button>
+    <button role="tab" data-view="scenarios" aria-selected="false">Scenarios</button>
+    <button role="tab" data-view="method" aria-selected="false">Method</button>
+  </nav>
+
+  <section class="view on" id="v-capacity">
+    <div class="panel">
+      <h2>Work center utilization</h2>
+      <p class="sub">Load as a share of regular capacity. Amber is tight, orange needs overtime, red is beyond overtime and goes to a subcontractor or stays unbuilt. Click a cell to chart that work center.</p>
+      <div class="legend"><span><span class="sw u0"></span>Under 70%</span><span><span class="sw u1"></span>70–85%</span><span><span class="sw u2"></span>85–100%</span><span><span class="sw u3"></span>Needs overtime</span><span><span class="sw u4"></span>Beyond overtime</span></div>
+      <div class="scroll-x"><table class="heat" id="heat"></table></div>
+    </div>
+    <div class="panel">
+      <div class="phead"><div><h2 id="loadTitle">Load vs capacity</h2><p class="sub" id="loadSub"></p></div><div class="seg" id="wcSeg" role="group" aria-label="Work center"></div></div>
+      <div class="legend" id="loadLegend"></div>
+      <svg class="chart" id="loadChart" role="img" aria-label="Load versus capacity by month"></svg>
+    </div>
+    <div class="panel">
+      <h2>Hours by work center</h2>
+      <p class="sub">Totals across the plan horizon. Station hours are machine or bench time; labor hours multiply by the crew on each station.</p>
+      <div class="scroll-x"><table id="hoursTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-cost">
+    <div class="panel">
+      <div class="phead"><div><h2>Monthly manufacturing cost</h2><p class="sub">Material dominates electronics cost, so conversion cost (labor, overtime, subcontract, overhead, carrying) is shown by default.</p></div>
+        <div class="seg" id="costSeg" role="group" aria-label="Cost view"><button data-cv="all" aria-pressed="false">All costs</button><button data-cv="conv" aria-pressed="true">Conversion only</button></div></div>
+      <div class="legend" id="costLegend"></div>
+      <svg class="chart" id="costChart" role="img" aria-label="Monthly cost by component"></svg>
+    </div>
+    <div class="two">
+      <div class="panel"><h2>Cost bridge, baseline to scenario</h2><p class="sub">Each bar applies one group of your changes in turn, so the steps add up to the total difference.</p><svg class="chart" id="bridge" role="img" aria-label="Cost bridge"></svg></div>
+      <div class="panel"><h2>What moves cost most</h2><p class="sub">Each driver moved down and up on the current scenario, holding everything else.</p><svg class="chart" id="tornado" role="img" aria-label="Sensitivity of total cost"></svg></div>
+    </div>
+    <div class="panel"><h2>Cost summary</h2><p class="sub">Plan horizon totals, scenario against baseline.</p><div class="scroll-x"><table id="costTable"></table></div></div>
+  </section>
+
+  <section class="view" id="v-labor">
+    <div class="panel">
+      <h2>Headcount needed vs staffed</h2>
+      <p class="sub">Full-time equivalents needed each month (regular plus overtime labor hours divided by one person's productive shift hours, after efficiency losses), against the roster implied by stations, shifts and crew. Red cells need more people than are staffed.</p>
+      <div class="scroll-x"><table id="fteTable"></table></div>
+    </div>
+    <div class="panel">
+      <h2>Labor cost by work center</h2>
+      <p class="sub">Regular pay includes burden and shift premiums. Overtime carries its premium plus payroll taxes.</p>
+      <div class="scroll-x"><table id="laborTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-products">
+    <div class="phead" style="margin-top:16px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input class="in" type="search" id="pq" placeholder="Search product or SKU" aria-label="Search products" style="min-width:220px">
+        <select class="in" id="pcat" aria-label="Category"></select>
+      </div>
+      <span class="note" id="pcount" style="margin:0"></span>
+    </div>
+    <div class="prodgrid" style="margin-top:12px">
+      <div class="plist"><table id="prodTable"></table></div>
+      <div class="panel drawer" id="drawer"><p class="note">Pick a product to see its routing, build time and cost.</p></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-setup">
+    <div class="panel">
+      <div class="phead"><div><h2>Work centers</h2><p class="sub">Capacity is stations × shifts × hours per shift × working days × efficiency. Crew is people per station. Cells that differ from the baseline are highlighted.</p></div><button class="btn small" id="resetWc">Reset work centers</button></div>
+      <div class="scroll-x"><table class="edit" id="wcTable"></table></div>
+    </div>
+    <div class="panel">
+      <div class="phead"><div><h2>Sourcing and standard routing by category</h2><p class="sub">Make or buy, bill-of-material cost as a share of price, contract manufacturer price for bought categories, and standard run minutes per unit at each work center. Individual products vary around these standards.</p></div><button class="btn small" id="resetCat">Reset categories</button></div>
+      <div class="scroll-x"><table class="edit" id="catTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-scenarios">
+    <div class="panel">
+      <h2>Scenario comparison</h2>
+      <p class="sub">Baseline, your current inputs and every saved scenario side by side. Saved scenarios stay in this browser.</p>
+      <div class="scroll-x"><table id="scnTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view method" id="v-method">
+    <div class="panel">
+    <h2>How the model works</h2>
+    <h3>Demand</h3>
+    <p>Starts from the monthly unit plan for each product, summed across warehouses. A seasonality profile keeps each product's total over the horizon and redistributes it across months: <code>units = average × (1 + (index − 1) × intensity)</code>, rescaled so the horizon total is unchanged. Volume change and a one-month event are applied after.</p>
+    <h3>Production schedule</h3>
+    <ul>
+      <li><b>Chase</b> builds each month's demand in that month.</li>
+      <li><b>Level</b> builds at the lowest constant rate that never falls behind cumulative demand.</li>
+      <li><b>Pre-build</b> starts from chase, works backward from the last month and moves volume above regular capacity into earlier months with spare room, up to the window you set.</li>
+    </ul>
+    <p>Stock built ahead of demand is charged at the carrying rate on its material plus labor value.</p>
+    <h3>Hours</h3>
+    <p>Each product has a routing with run minutes per unit and setup hours per run at five work centers. <code>station hours = units × run minutes ÷ 60 × (1 + rework) × productivity factor + runs × setup hours</code>. Productivity compounds monthly from the annual rate. Labor hours = station hours × crew.</p>
+    <h3>Capacity</h3>
+    <p>Working days are counted from the real calendar for the days per week each work center runs, minus plant holidays placed in the months they usually fall. <code>regular capacity = stations × shifts × hours per shift × working days × efficiency</code>. Overtime is capped by your limit and by the hours physically left in the month. Anything beyond overtime is subcontracted or left unbuilt.</p>
+    <h3>Cost</h3>
+    <ul>
+      <li><b>Material</b> = units built × price × bill-of-material share × (1 + scrap), with inflation from its effective month.</li>
+      <li><b>Regular labor</b> = labor hours × rate × (1 + wage increase after its effective month) × (1 + average shift premium) × (1 + burden).</li>
+      <li><b>Overtime</b> = overtime labor hours × rate × (1 + premium) × 1.10 for payroll taxes.</li>
+      <li><b>Subcontract</b> = overflow station hours × (in-house loaded labor plus variable overhead per hour) × subcontract multiplier.</li>
+      <li><b>Variable overhead</b> = station hours × rate per hour (power, consumables, maintenance).</li>
+      <li><b>Fixed overhead</b> = stations × monthly cost per station + supervision per shift + plant fixed cost.</li>
+      <li><b>Headcount</b> needed = (regular + overtime station hours) × crew ÷ (hours per shift × working days × efficiency).</li>
+      <li><b>Contract manufacturing</b> = units × price × contract price share, for bought categories.</li>
+    </ul>
+    <p>Unit cost allocates each work center's monthly cost to products by their share of that work center's station hours in that month. Fixed cost not absorbed in a month is spread by total station hours.</p>
+    <h3>Bridge and sensitivity</h3>
+    <p>The bridge applies your changes in groups, in this order: demand, strategy, operations, productivity, labor, materials. Sensitivity moves one driver at a time on the current scenario, holding everything else.</p>
+    </div>
+  </section>
+</main>
+</div>
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script id="data" type="application/json">{"months":["2026-10","2026-11","2026-12","2027-01","2027-02","2027-03","2027-04","2027-05","2027-06","2027-07","2027-08","2027-09","2027-10","2027-11","2027-12"],"today":"2026-10-09","products":[{"i":"BP-4059","d":"Wired Headset, dual ear","b":"Brightpath","m":"Audio","p":36.96,"dem":[1818,2145,2265,1487,1344,1587,1561,1610,1726,1822,2053,1974,1780,2295,2219],"ltm":19203,"wh":5,"rf":0.891,"bf":1.058},{"i":"BP-6406","d":"Conference Speakerphone, gray","b":"Brightpath","m":"Audio","p":187.56,"dem":[1462,1618,1735,1095,1100,1279,1215,1300,1348,1415,1657,1577,1563,1612,1705],"ltm":15896,"wh":5,"rf":1.167,"bf":1.023},{"i":"LM-8565","d":"Wireless Earbuds, ANC","b":"Kestrel Labs","m":"Audio","p":92.7,"dem":[697,812,861,547,527,619,599,612,654,710,796,689,753,824,919],"ltm":6817,"wh":5,"rf":0.87,"bf":0.997},{"i":"LM-9016","d":"Wireless Earbuds, ANC, refresh","b":"Brightpath","m":"Audio","p":99.02,"dem":[1604,1878,2004,1225,1143,1460,1337,1448,1467,1543,1765,1715,1656,1945,2030],"ltm":11784,"wh":5,"rf":1.092,"bf":0.951},{"i":"NB-4725","d":"Conference Speakerphone","b":"Brightpath","m":"Audio","p":164.77,"dem":[1229,1401,1434,982,923,1111,1021,1053,1112,1213,1354,1357,1241,1425,1446],"ltm":14455,"wh":5,"rf":0.954,"bf":0.951},{"i":"QN-7404","d":"Noise-Canceling Headset, USB-C","b":"Voltwise","m":"Audio","p":136.15,"dem":[1018,1173,1236,847,758,905,830,878,950,985,1158,1023,1059,1199,1323],"ltm":13603,"wh":4,"rf":1.145,"bf":1.05},{"i":"VW-7592","d":"Noise-Canceling Headset, USB-C, gray","b":"Northbeam","m":"Audio","p":127.0,"dem":[168,211,221,133,134,156,147,155,169,180,199,190,169,207,225],"ltm":7300,"wh":3,"rf":1.173,"bf":1.03},{"i":"VW-8369","d":"Wireless Earbuds, ANC, refresh","b":"Kestrel Labs","m":"Audio","p":95.3,"dem":[1491,1806,1799,1250,1160,1383,1316,1388,1425,1488,1675,1631,1494,1927,1820],"ltm":17331,"wh":5,"rf":1.051,"bf":0.947},{"i":"AF-4236","d":"Thin Client, 4GB / 32GB, gray","b":"Northbeam","m":"Desktops","p":305.19,"dem":[343,413,449,291,265,318,298,326,329,352,412,368,340,439,469],"ltm":3834,"wh":4,"rf":0.86,"bf":1.055},{"i":"AF-4434","d":"All-in-One 24\", 16GB / 512GB","b":"Kestrel Labs","m":"Desktops","p":1197.36,"dem":[72,89,90,62,59,68,66,67,68,78,79,76,74,90,97],"ltm":1168,"wh":3,"rf":1.119,"bf":0.963},{"i":"AF-7495","d":"Mini PC, 8-core, 16GB / 512GB","b":"Brightpath","m":"Desktops","p":588.44,"dem":[199,245,251,166,157,188,179,188,199,196,228,226,195,260,269],"ltm":2133,"wh":3,"rf":1.14,"bf":0.991},{"i":"KL-1432","d":"Thin Client, 4GB / 32GB, gray","b":"Brightpath","m":"Desktops","p":311.61,"dem":[33,41,41,28,26,29,28,28,31,34,38,34,34,44,43],"ltm":388,"wh":3,"rf":0.91,"bf":1.038},{"i":"KL-2287","d":"All-in-One 24\", 16GB / 512GB, gray","b":"Lumora","m":"Desktops","p":1188.76,"dem":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ltm":89,"wh":2,"rf":0.938,"bf":1.044},{"i":"KL-9030","d":"Mini PC, 8-core, 16GB / 512GB, gray","b":"Northbeam","m":"Desktops","p":678.73,"dem":[330,396,396,261,255,283,285,300,304,318,371,358,328,422,397],"ltm":3176,"wh":5,"rf":1.028,"bf":1.04},{"i":"LM-9819","d":"Tower Workstation, 32GB / 1TB, refresh","b":"Kestrel Labs","m":"Desktops","p":1640.79,"dem":[209,239,253,168,154,185,179,186,195,200,242,220,208,240,269],"ltm":2362,"wh":5,"rf":0.914,"bf":0.979},{"i":"QN-4241","d":"Mini PC, 8-core, 16GB / 512GB, refresh","b":"Voltwise","m":"Desktops","p":625.69,"dem":[226,267,281,186,165,204,185,209,208,228,250,239,235,281,295],"ltm":2448,"wh":5,"rf":0.881,"bf":1.033},{"i":"QN-4437","d":"Tower Workstation, 32GB / 1TB","b":"Kestrel Labs","m":"Desktops","p":1826.52,"dem":[76,90,90,59,59,70,67,70,72,77,86,77,81,91,89],"ltm":827,"wh":2,"rf":0.901,"bf":0.983},{"i":"VW-2014","d":"Thin Client, 4GB / 32GB","b":"Kestrel Labs","m":"Desktops","p":299.86,"dem":[10,13,14,9,9,10,13,10,11,11,12,13,10,13,15],"ltm":1181,"wh":2,"rf":1.037,"bf":0.965},{"i":"BP-5055","d":"KVM Switch, 2-port 4K","b":"Brightpath","m":"Docks & Hubs","p":108.64,"dem":[1457,1700,1691,1159,1088,1300,1231,1258,1338,1443,1669,1461,1521,1752,1765],"ltm":14807,"wh":4,"rf":1.006,"bf":1.033},{"i":"BP-6911","d":"USB-C Dock, 100W, dual display, gray","b":"Kestrel Labs","m":"Docks & Hubs","p":201.25,"dem":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ltm":952,"wh":4,"rf":1.043,"bf":0.955},{"i":"NB-7003","d":"KVM Switch, 2-port 4K, gray","b":"Arcfield","m":"Docks & Hubs","p":125.05,"dem":[807,941,962,639,605,714,680,730,742,818,890,886,842,951,1012],"ltm":9592,"wh":5,"rf":1.178,"bf":0.947},{"i":"QN-2461","d":"USB-C Travel Hub, 7-in-1, gray","b":"Quillon","m":"Docks & Hubs","p":52.94,"dem":[513,591,647,402,383,465,421,468,488,493,549,526,548,596,688],"ltm":5661,"wh":4,"rf":1.145,"bf":1.057},{"i":"QN-5393","d":"Thunderbolt Dock, 4 ports","b":"Voltwise","m":"Docks & Hubs","p":258.12,"dem":[1096,1337,1356,883,832,1001,972,991,1035,1054,1232,1155,1148,1384,1402],"ltm":12326,"wh":4,"rf":1.155,"bf":1.043},{"i":"VW-4303","d":"USB-C Travel Hub, 7-in-1","b":"Kestrel Labs","m":"Docks & Hubs","p":52.99,"dem":[185,212,217,143,127,174,161,155,177,181,202,197,193,215,220],"ltm":3704,"wh":3,"rf":1.124,"bf":0.946},{"i":"VW-7925","d":"USB-C Dock, 100W, dual display","b":"Quillon","m":"Docks & Hubs","p":181.86,"dem":[245,292,325,213,189,216,210,241,243,233,304,279,241,291,338],"ltm":3935,"wh":3,"rf":0.963,"bf":1.05},{"i":"BP-4957","d":"15\" Laptop, 12-core, 32GB / 1TB","b":"Arcfield","m":"Laptops","p":1298.67,"dem":[341,402,421,274,269,303,281,319,310,326,383,385,344,412,453],"ltm":4659,"wh":3,"rf":0.908,"bf":1.054},{"i":"KL-1625","d":"Chromebook 11\", 4GB / 64GB, refresh","b":"Northbeam","m":"Laptops","p":268.67,"dem":[358,436,435,283,283,318,311,324,359,345,394,413,355,437,466],"ltm":4308,"wh":3,"rf":0.985,"bf":0.995},{"i":"KL-2645","d":"14\" Laptop, 8-core, 16GB / 512GB, refresh","b":"Quillon","m":"Laptops","p":933.66,"dem":[239,272,287,193,176,216,200,209,210,221,250,258,235,290,288],"ltm":2623,"wh":2,"rf":1.021,"bf":1.023},{"i":"KL-9462","d":"14\" Laptop, 8-core, 16GB / 512GB, gray","b":"Northbeam","m":"Laptops","p":876.3,"dem":[227,287,303,204,186,228,203,210,220,255,269,266,242,286,312],"ltm":2746,"wh":2,"rf":1.13,"bf":0.979},{"i":"LM-5139","d":"14\" Laptop, 8-core, 16GB / 512GB","b":"Brightpath","m":"Laptops","p":966.11,"dem":[1209,1542,1514,1006,977,1140,1037,1189,1255,1207,1484,1325,1265,1658,1545],"ltm":10670,"wh":5,"rf":0.934,"bf":1.039},{"i":"NB-7136","d":"Chromebook 11\", 4GB / 64GB","b":"Lumora","m":"Laptops","p":269.57,"dem":[626,746,753,499,477,570,546,555,608,606,699,685,671,760,742],"ltm":7371,"wh":5,"rf":0.89,"bf":0.997},{"i":"NB-7498","d":"14\" Rugged Laptop, 16GB / 256GB","b":"Kestrel Labs","m":"Laptops","p":1472.01,"dem":[1141,1341,1469,981,893,1064,1006,1086,1099,1158,1291,1305,1136,1392,1449],"ltm":10979,"wh":4,"rf":1.045,"bf":1.013},{"i":"QN-4418","d":"15\" Laptop, 12-core, 32GB / 1TB, gray","b":"Voltwise","m":"Laptops","p":1367.18,"dem":[245,307,313,201,188,226,217,223,246,270,284,264,257,304,337],"ltm":2864,"wh":2,"rf":0.901,"bf":1.016},{"i":"QN-7885","d":"13\" Ultralight Laptop, 16GB / 512GB","b":"Brightpath","m":"Laptops","p":1035.32,"dem":[603,746,755,484,449,525,525,541,557,591,705,625,612,740,812],"ltm":8999,"wh":5,"rf":1.025,"bf":1.042},{"i":"BP-5281","d":"24\" FHD Monitor, IPS","b":"Northbeam","m":"Monitors","p":134.11,"dem":[728,885,962,629,572,633,642,679,713,736,838,815,764,874,977],"ltm":8807,"wh":5,"rf":0.917,"bf":0.95},{"i":"BP-5748","d":"27\" 4K Monitor, USB-C, refresh","b":"Arcfield","m":"Monitors","p":363.33,"dem":[506,606,617,429,395,481,438,500,500,526,621,541,497,648,620],"ltm":5923,"wh":4,"rf":0.92,"bf":1.007},{"i":"LM-2177","d":"27\" QHD Monitor, 165Hz","b":"Lumora","m":"Monitors","p":285.8,"dem":[673,749,809,540,516,589,589,616,632,656,762,715,720,763,829],"ltm":8883,"wh":4,"rf":1.003,"bf":1.025},{"i":"LM-8095","d":"27\" QHD Monitor, 165Hz, refresh","b":"Lumora","m":"Monitors","p":295.55,"dem":[2064,2356,2645,1777,1593,1899,1734,1798,2029,2000,2366,2174,2078,2498,2777],"ltm":21322,"wh":2,"rf":0.877,"bf":1.041},{"i":"LM-9032","d":"34\" Ultrawide Monitor, curved, gray","b":"Kestrel Labs","m":"Monitors","p":535.07,"dem":[30,36,38,26,24,29,28,29,29,31,37,33,30,37,38],"ltm":3022,"wh":3,"rf":1.194,"bf":1.029},{"i":"VW-1017","d":"22\" Touch Monitor, gray","b":"Quillon","m":"Monitors","p":279.76,"dem":[1337,1674,1733,1155,1074,1288,1228,1243,1395,1359,1651,1480,1319,1723,1754],"ltm":15945,"wh":3,"rf":1.11,"bf":1.042},{"i":"VW-1888","d":"22\" Touch Monitor","b":"Brightpath","m":"Monitors","p":245.99,"dem":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ltm":2379,"wh":5,"rf":0.883,"bf":0.995},{"i":"VW-6003","d":"27\" 4K Monitor, USB-C","b":"Lumora","m":"Monitors","p":407.02,"dem":[850,1015,1024,666,668,785,742,787,801,885,946,907,895,1045,1016],"ltm":9642,"wh":4,"rf":0.878,"bf":1.034},{"i":"VW-6938","d":"34\" Ultrawide Monitor, curved","b":"Voltwise","m":"Monitors","p":594.66,"dem":[563,655,692,444,423,483,452,488,526,538,663,599,590,698,695],"ltm":7642,"wh":5,"rf":1.038,"bf":0.953},{"i":"AF-9913","d":"Mesh Wi-Fi Kit, 3-pack, refresh","b":"Brightpath","m":"Networking","p":277.91,"dem":[574,696,710,464,440,518,502,502,548,601,637,577,584,742,721],"ltm":6489,"wh":5,"rf":1.018,"bf":1.031},{"i":"BP-8055","d":"Mesh Wi-Fi Kit, 3-pack","b":"Brightpath","m":"Networking","p":324.89,"dem":[869,1049,1131,701,663,822,749,764,862,886,1016,975,870,1111,1218],"ltm":9995,"wh":5,"rf":1.115,"bf":0.943},{"i":"KL-3459","d":"Wi-Fi 6E Router","b":"Northbeam","m":"Networking","p":242.98,"dem":[32,37,38,26,24,29,28,29,29,33,35,33,33,40,39],"ltm":1341,"wh":3,"rf":1.114,"bf":1.06},{"i":"KL-5384","d":"Wi-Fi 6 Access Point, ceiling","b":"Voltwise","m":"Networking","p":174.14,"dem":[242,289,291,189,180,227,215,226,222,231,261,281,239,300,301],"ltm":2754,"wh":2,"rf":0.853,"bf":0.951},{"i":"LM-3668","d":"24-Port PoE Switch, managed, refresh","b":"Quillon","m":"Networking","p":568.0,"dem":[370,462,487,310,305,338,316,344,344,368,454,428,387,455,501],"ltm":4713,"wh":3,"rf":1.174,"bf":0.954},{"i":"NB-4322","d":"Wi-Fi 6 Access Point, ceiling, refresh","b":"Arcfield","m":"Networking","p":207.59,"dem":[168,193,199,141,125,151,150,160,152,165,203,176,170,197,197],"ltm":1904,"wh":2,"rf":0.987,"bf":0.997},{"i":"NB-9576","d":"8-Port Gigabit Switch, gray","b":"Brightpath","m":"Networking","p":35.76,"dem":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ltm":1159,"wh":4,"rf":1.017,"bf":1.03},{"i":"QN-4070","d":"8-Port Gigabit Switch","b":"Northbeam","m":"Networking","p":37.69,"dem":[303,359,406,251,236,273,267,277,281,317,342,323,320,370,424],"ltm":3901,"wh":4,"rf":1.159,"bf":0.956},{"i":"VW-1670","d":"24-Port PoE Switch, managed","b":"Northbeam","m":"Networking","p":600.02,"dem":[284,348,373,237,221,272,253,259,269,288,324,324,300,354,395],"ltm":3218,"wh":3,"rf":1.123,"bf":1.003},{"i":"VW-2128","d":"Wi-Fi 6E Router, gray","b":"Kestrel Labs","m":"Networking","p":222.74,"dem":[41,55,50,34,31,48,35,36,46,44,51,52,41,57,51],"ltm":1734,"wh":2,"rf":1.169,"bf":1.011},{"i":"AF-4219","d":"Ergonomic Mouse, wireless, gray","b":"Northbeam","m":"Peripherals","p":40.93,"dem":[681,869,861,592,566,658,635,624,674,698,781,777,706,867,909],"ltm":12874,"wh":3,"rf":1.113,"bf":1.054},{"i":"KL-5125","d":"1080p Webcam with mic","b":"Lumora","m":"Peripherals","p":71.08,"dem":[694,897,948,585,554,692,644,695,705,706,895,787,721,890,972],"ltm":9119,"wh":3,"rf":1.036,"bf":0.966},{"i":"LM-5365","d":"4K Conference Camera","b":"Northbeam","m":"Peripherals","p":409.93,"dem":[2102,2386,2575,1748,1632,1954,1828,1957,1983,2160,2360,2406,2064,2566,2615],"ltm":23050,"wh":5,"rf":1.015,"bf":1.029},{"i":"QN-6249","d":"4K Conference Camera, gray","b":"Brightpath","m":"Peripherals","p":447.78,"dem":[306,358,365,244,229,272,266,261,286,300,338,321,323,365,378],"ltm":4334,"wh":3,"rf":1.119,"bf":0.986},{"i":"QN-9146","d":"Wireless Keyboard & Mouse Kit","b":"Northbeam","m":"Peripherals","p":61.53,"dem":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ltm":2628,"wh":3,"rf":1.182,"bf":0.944},{"i":"QN-9500","d":"Wireless Keyboard & Mouse Kit, refresh","b":"Kestrel Labs","m":"Peripherals","p":54.09,"dem":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ltm":1150,"wh":3,"rf":1.122,"bf":1.056},{"i":"VW-4001","d":"Ergonomic Mouse, wireless","b":"Voltwise","m":"Peripherals","p":39.58,"dem":[1228,1474,1462,1011,946,1132,1091,1142,1181,1284,1376,1302,1291,1499,1532],"ltm":15818,"wh":4,"rf":1.024,"bf":0.945},{"i":"VW-8762","d":"Mechanical Keyboard, TKL","b":"Quillon","m":"Peripherals","p":83.71,"dem":[739,871,925,617,547,686,622,652,714,704,892,827,736,892,907],"ltm":5761,"wh":2,"rf":0.975,"bf":1.059},{"i":"AF-6498","d":"Laptop Power Bank, 25,600mAh, gray","b":"Kestrel Labs","m":"Power","p":86.56,"dem":[1251,1476,1519,993,964,1113,1065,1149,1181,1251,1447,1351,1334,1531,1590],"ltm":14167,"wh":5,"rf":0.916,"bf":1.011},{"i":"LM-4982","d":"UPS 1500VA, line-interactive","b":"Arcfield","m":"Power","p":208.04,"dem":[506,606,619,414,351,421,417,411,432,474,528,479,524,598,617],"ltm":7891,"wh":2,"rf":1.111,"bf":1.007},{"i":"LM-5587","d":"65W USB-C GaN Charger, refresh","b":"Brightpath","m":"Power","p":40.71,"dem":[304,343,360,238,224,272,247,262,283,298,341,303,319,339,367],"ltm":12462,"wh":5,"rf":0.875,"bf":0.942},{"i":"LM-9021","d":"Surge Protector, 12-outlet","b":"Brightpath","m":"Power","p":30.26,"dem":[788,993,1003,629,633,740,662,752,740,803,968,875,821,1061,1018],"ltm":9009,"wh":4,"rf":0.899,"bf":0.951},{"i":"LM-9088","d":"Laptop Power Bank, 25,600mAh","b":"Voltwise","m":"Power","p":81.49,"dem":[969,1159,1229,725,713,860,851,879,877,950,1063,996,1004,1249,1214],"ltm":10371,"wh":2,"rf":1.157,"bf":1.001},{"i":"NB-2176","d":"65W USB-C GaN Charger","b":"Northbeam","m":"Power","p":38.48,"dem":[492,587,626,410,391,459,426,447,463,520,551,542,520,581,619],"ltm":6395,"wh":5,"rf":1.088,"bf":1.033},{"i":"NB-8117","d":"UPS 1500VA, line-interactive, refresh","b":"Brightpath","m":"Power","p":239.97,"dem":[825,1005,1026,648,623,716,694,720,726,824,946,838,863,1042,1106],"ltm":11109,"wh":4,"rf":1.097,"bf":0.977},{"i":"VW-5498","d":"Surge Protector, 12-outlet, refresh","b":"Voltwise","m":"Power","p":30.8,"dem":[503,583,613,391,388,446,433,444,468,506,569,522,529,608,610],"ltm":4985,"wh":3,"rf":0.878,"bf":1.021},{"i":"AF-5514","d":"4-Bay NAS Enclosure, gray","b":"Voltwise","m":"Storage","p":434.26,"dem":[237,305,300,212,188,225,208,236,229,245,299,263,255,303,307],"ltm":3923,"wh":5,"rf":0.942,"bf":1.033},{"i":"AF-7757","d":"1TB NVMe SSD","b":"Northbeam","m":"Storage","p":72.85,"dem":[233,283,285,190,172,209,202,205,214,234,269,253,251,296,302],"ltm":8303,"wh":4,"rf":0.88,"bf":0.96},{"i":"BP-7381","d":"128GB USB Flash Drive, 10-pack, refresh","b":"Lumora","m":"Storage","p":111.6,"dem":[357,422,433,277,272,321,301,332,328,356,396,381,384,442,462],"ltm":3668,"wh":2,"rf":1.027,"bf":0.988},{"i":"BP-7439","d":"128GB USB Flash Drive, 10-pack","b":"Voltwise","m":"Storage","p":125.05,"dem":[303,358,382,230,221,275,246,265,283,292,330,332,321,355,407],"ltm":3348,"wh":2,"rf":1.046,"bf":1.021},{"i":"BP-7490","d":"1TB NVMe SSD, refresh","b":"Northbeam","m":"Storage","p":72.51,"dem":[676,801,880,551,531,592,562,630,638,698,803,711,712,831,894],"ltm":7741,"wh":3,"rf":1.154,"bf":0.985},{"i":"BP-8568","d":"4-Bay NAS Enclosure","b":"Voltwise","m":"Storage","p":390.94,"dem":[700,748,767,503,536,670,547,607,601,622,725,698,705,775,762],"ltm":14567,"wh":5,"rf":0.859,"bf":1.055},{"i":"LM-7276","d":"2TB Portable SSD","b":"Arcfield","m":"Storage","p":139.04,"dem":[882,1085,1119,743,683,821,786,829,874,935,1024,1081,926,1067,1122],"ltm":10258,"wh":4,"rf":0.932,"bf":1.0},{"i":"NB-9837","d":"2TB Portable SSD, gray","b":"Voltwise","m":"Storage","p":148.7,"dem":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ltm":699,"wh":2,"rf":0.87,"bf":0.943},{"i":"QN-2129","d":"4-Bay NAS Enclosure, refresh","b":"Lumora","m":"Storage","p":434.72,"dem":[2142,2601,2748,1721,1671,1948,1784,1879,2069,2043,2454,2368,2140,2724,2880],"ltm":21338,"wh":5,"rf":0.983,"bf":1.058},{"i":"QN-4854","d":"1TB NVMe SSD, gray","b":"Northbeam","m":"Storage","p":73.41,"dem":[789,960,941,615,600,693,686,688,743,764,931,872,834,1025,995],"ltm":8527,"wh":3,"rf":1.099,"bf":1.012},{"i":"KL-2075","d":"12\" Pro Tablet, 256GB","b":"Quillon","m":"Tablets","p":740.63,"dem":[437,512,560,367,334,403,381,400,436,448,508,469,447,512,605],"ltm":4408,"wh":5,"rf":1.021,"bf":0.972},{"i":"LM-5109","d":"8\" Rugged Tablet, 64GB, gray","b":"Arcfield","m":"Tablets","p":527.15,"dem":[332,417,391,278,245,297,288,305,321,339,397,358,335,441,389],"ltm":4438,"wh":5,"rf":1.144,"bf":0.952},{"i":"NB-1986","d":"8\" Rugged Tablet, 64GB","b":"Voltwise","m":"Tablets","p":508.45,"dem":[250,308,317,206,198,232,218,228,233,245,295,264,249,325,337],"ltm":2868,"wh":4,"rf":1.068,"bf":0.975},{"i":"NB-5680","d":"8\" Rugged Tablet, 64GB, gray","b":"Brightpath","m":"Tablets","p":525.88,"dem":[45,51,56,34,33,39,39,41,41,43,52,48,46,55,57],"ltm":494,"wh":2,"rf":1.102,"bf":1.01},{"i":"NB-7024","d":"10\" Tablet, 64GB","b":"Voltwise","m":"Tablets","p":246.88,"dem":[275,326,326,227,194,241,228,248,261,262,294,297,289,336,329],"ltm":3414,"wh":4,"rf":0.947,"bf":0.994}]}</script>
+<script>
+(function(){
+"use strict";
+const DATA=JSON.parse(document.getElementById('data').textContent);
+const MONTHS=DATA.months, K=MONTHS.length, PR=DATA.products;
+const CATS=[...new Set(PR.map(p=>p.m))].sort();
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const clone=o=>JSON.parse(JSON.stringify(o));
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const mlabel=i=>{const [y,m]=MONTHS[i].split('-');return new Date(+y,+m-1,1).toLocaleString('en-US',{month:'short'})+' '+y.slice(2)};
+const calM=i=>+MONTHS[i].split('-')[1];
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function num(v,d){if(v==null||!isFinite(v))return '–';const a=Math.abs(v);if(a>=1e9)return (v/1e9).toFixed(2)+'B';if(a>=1e6)return (v/1e6).toFixed(a>=1e8?0:a>=1e7?1:2)+'M';if(a>=1e4)return (v/1e3).toFixed(a>=1e5?0:1)+'k';return v.toLocaleString('en-US',{maximumFractionDigits:d??0})}
+const usd=(v,d)=>(v<0?'−$':'$')+num(Math.abs(v),d);
+const usd2=v=>(v<0?'−$':'$')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=(v,d)=>v==null||!isFinite(v)?'–':(v*100).toFixed(d??0)+'%';
+const spct=v=>v==null||!isFinite(v)?'–':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(1)+'%';
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),1800)}
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const WCN=['SMT line','Sub-assembly','Final assembly','Test & burn-in','Pack-out'];
+const WCD=['Surface-mount circuit board lines','Modules, displays, harnesses','Bench assembly and fastening','Automated burn-in racks','Labeling, boxing, palletizing'];
+const PROFILES={flat:[1,1,1,1,1,1,1,1,1,1,1,1],holiday:[.82,.76,.86,.86,.9,.94,.98,1.04,1.08,1.16,1.3,1.3],bts:[.86,.8,.9,.9,.96,1.06,1.28,1.42,1.14,.92,.88,.88],qend:[.86,.9,1.18,.88,.94,1.2,.88,.94,1.2,.92,.98,1.12]};
+const CAT_DEF={
+  'Laptops':{make:true,bom:62,cm:70,min:[6,12,22,35,4]},'Desktops':{make:true,bom:60,cm:68,min:[5,15,28,45,6]},'Monitors':{make:true,bom:58,cm:66,min:[3,8,18,12,5]},
+  'Docks & Hubs':{make:true,bom:45,cm:55,min:[4,4,6,5,2]},'Peripherals':{make:true,bom:40,cm:50,min:[1.5,2,4,2,1.5]},'Audio':{make:false,bom:48,cm:58,min:[1.5,3,5,3,1.5]},
+  'Networking':{make:true,bom:48,cm:58,min:[4,6,10,15,3]},'Storage':{make:true,bom:55,cm:62,min:[2,2,4,8,1.5]},'Tablets':{make:true,bom:60,cm:68,min:[5,10,18,25,3]},'Power':{make:false,bom:44,cm:52,min:[2,3,5,6,2]}};
+const BASE={
+  profile:'plan',intensity:1,custom:PROFILES.holiday.slice(),growth:0,evMonth:-1,evPct:0,
+  wageInc:0,wageEff:7,burden:32,sd2:8,sd3:12,otPrem:50,otCap:20,prodGain:3,overflow:'sub',subMult:1.6,
+  matInfl:0,matEff:7,cmInfl:0,scrap:1.5,holidays:10,runs:2,rework:3,fixAdj:0,strategy:'chase',window:3,carry:22,runScale:1,
+  wc:[{st:7,sh:3,dpw:5,hr:8,oee:75,crew:3,rate:31,voh:65,fix:22000,sup:14000,setup:1.5,rw:false},
+      {st:15,sh:2,dpw:5,hr:8,oee:85,crew:1,rate:24,voh:4,fix:900,sup:14000,setup:0.5,rw:false},
+      {st:30,sh:2,dpw:5,hr:8,oee:85,crew:1,rate:25,voh:5,fix:1100,sup:14000,setup:0.75,rw:true},
+      {st:16,sh:3,dpw:7,hr:8,oee:90,crew:0.15,rate:33,voh:6,fix:2500,sup:14000,setup:0.25,rw:true},
+      {st:7,sh:2,dpw:5,hr:8,oee:88,crew:1,rate:21,voh:3,fix:800,sup:14000,setup:0.25,rw:false}],
+  plantFix:180000,cats:clone(CAT_DEF)};
+const GROUPS={demand:['profile','intensity','custom','growth','evMonth','evPct'],strategy:['strategy','window','carry'],
+  ops:['holidays','runs','rework','fixAdj','wc.st','wc.sh','wc.dpw','wc.hr','wc.oee','wc.voh','wc.fix','wc.sup','wc.setup','plantFix'],
+  prod:['prodGain','runScale'],labor:['wageInc','wageEff','burden','sd2','sd3','otPrem','otCap','overflow','subMult','wc.rate','wc.crew'],
+  material:['matInfl','matEff','cmInfl','scrap','cats']};
+const GLABEL={demand:'Demand & seasonality',strategy:'Production strategy',ops:'Operations',prod:'Productivity',labor:'Labor',material:'Materials & sourcing'};
+const PRESETS={
+  holiday:{name:'Holiday surge',apply:p=>{p.profile='holiday';p.intensity=1.3;p.growth=10}},
+  labor:{name:'Labor inflation',apply:p=>{p.wageInc=8;p.wageEff=7;p.burden=35;p.otPrem=60}},
+  tariff:{name:'Tariff shock on components',apply:p=>{p.matInfl=12;p.matEff=3;p.cmInfl=10}},
+  capacity:{name:'Add capacity and pre-build',apply:p=>{p.wc[2].st=34;p.wc[4].st=8;p.wc[1].st=17;p.strategy='prebuild';p.window=3}},
+  level:{name:'Back-to-school, level loaded',apply:p=>{p.profile='bts';p.intensity=1.2;p.strategy='level'}},
+  lean:{name:'Lean: productivity and fewer runs',apply:p=>{p.prodGain=8;p.runs=1;p.rework=1.5;p.scrap=0.8}}};
+
+let routing=LS.get('capmodel-routing-v1',{});
+let saved=LS.get('capmodel-scenarios-v1',[]);
+let par=clone(BASE);
+const ui={view:'capacity',wc:2,cv:'conv',psort:{k:'units',d:-1},sel:null,pq:'',pcat:''};
+
+const HOLDIST=[2,1,0,0,1,0,1,0,1,0,2,2];
+const WDC={};
+function workdays(k,dpw,hol){const key=k+'|'+dpw+'|'+hol;if(WDC[key]!=null)return WDC[key];
+  const [y,m]=MONTHS[k].split('-').map(Number);const dim=new Date(y,m,0).getDate();let n=0;
+  for(let d=1;d<=dim;d++){const wd=(new Date(y,m-1,d).getDay()+6)%7;if(wd<dpw)n++}
+  return WDC[key]=Math.max(0,n-hol*HOLDIST[m-1]/10)}
+const daysIn=k=>{const [y,m]=MONTHS[k].split('-').map(Number);return new Date(y,m,0).getDate()};
+
+function route(p,P){const c=P.cats[p.m],o=routing[p.i]||{};
+  return {min:c.min.map((v,w)=>o.min&&o.min[w]!=null?o.min[w]:+(v*p.rf).toFixed(2)),setup:P.wc.map((w,j)=>o.setup&&o.setup[j]!=null?o.setup[j]:w.setup),make:c.make}}
+
+function run(P){
+  const W=5,prods=PR.map(p=>({p,r:route(p,P)}));
+  const prof=P.profile==='plan'?null:(P.profile==='custom'?P.custom:PROFILES[P.profile]);
+  const dem=prods.map(({p})=>{const base=p.dem,avg=sum(base)/K;let d;
+    if(!prof)d=base.map(v=>Math.max(0,avg+(v-avg)*P.intensity));
+    else{const idx=MONTHS.map((_,k)=>Math.max(0,1+(prof[calM(k)-1]-1)*P.intensity));const mi=sum(idx)/K||1;d=idx.map(x=>avg*x/mi)}
+    return d.map((v,k)=>Math.max(0,v*(1+P.growth/100)*(k===+P.evMonth?1+P.evPct/100:1)))});
+  const pf=MONTHS.map((_,k)=>Math.pow(1-P.prodGain/100,k/12)*P.runScale);
+  const cap=P.wc.map(w=>MONTHS.map((_,k)=>{const wd=workdays(k,w.dpw,P.holidays);const reg=w.st*w.sh*w.hr*wd*w.oee/100;
+    const max=w.st*24*Math.max(0,daysIn(k)-P.holidays*HOLDIST[calM(k)-1]/10)*w.oee/100;return {wd,reg,ot:Math.max(0,Math.min(reg*P.otCap/100,max-reg))}}));
+  const rwf=w=>1+(P.wc[w].rw?P.rework/100:0);
+  const runH=(i,w,k)=>prods[i].r.min[w]/60*pf[k]*rwf(w);
+  const isMake=i=>prods[i].r.make;
+  const prod=dem.map(d=>d.slice());
+  if(P.strategy==='level')prod.forEach((a,i)=>{if(!isMake(i))return;let c=0,r=0;dem[i].forEach((v,k)=>{c+=v;r=Math.max(r,c/(k+1))});for(let k=0;k<K;k++)a[k]=r});
+  const loadAt=k=>{const L=Array(W).fill(0),S=Array(W).fill(0);prod.forEach((a,i)=>{if(!isMake(i)||a[k]<=0)return;for(let w=0;w<W;w++){L[w]+=a[k]*runH(i,w,k);S[w]+=P.runs*prods[i].r.setup[w]}});return {L,S}};
+  if(P.strategy==='prebuild'){
+    for(let m=K-1;m>=1;m--){const {L,S}=loadAt(m);let f=0;
+      for(let w=0;w<W;w++)if(L[w]>0)f=Math.max(f,1-Math.max(0,cap[w][m].reg-S[w])/L[w]);
+      if(f<=1e-4)continue;let rem=f;const orig=prod.map(a=>a[m]);
+      for(let j=m-1;j>=Math.max(0,m-P.window)&&rem>1e-4;j--){const lj=loadAt(j);let g=Infinity;
+        for(let w=0;w<W;w++)if(L[w]>0){const S2=lj.S[w]||sum(prods.map((x,i)=>isMake(i)&&orig[i]>0?P.runs*x.r.setup[w]:0));g=Math.min(g,Math.max(0,cap[w][j].reg-lj.L[w]-S2)/L[w])}
+        const x=Math.min(rem,g);if(x<=0)continue;prod.forEach((a,i)=>{if(isMake(i))a[j]+=orig[i]*x});rem-=x}
+      const moved=f-rem;prod.forEach((a,i)=>{if(isMake(i))a[m]=orig[i]*(1-moved)})}}
+  const res={P,dem,prod,cap,prods,pf,wc:[],units:Array(K).fill(0),built:Array(K).fill(0)};
+  const pH=prods.map(()=>Array.from({length:W},()=>Array(K).fill(0)));
+  for(let w=0;w<W;w++){const load=Array(K).fill(0),setupH=Array(K).fill(0),byCat={};CATS.forEach(c=>byCat[c]=Array(K).fill(0));
+    for(let k=0;k<K;k++)prod.forEach((a,i)=>{if(!isMake(i)||a[k]<=0)return;const s=P.runs*prods[i].r.setup[w];const h=a[k]*runH(i,w,k)+s;pH[i][w][k]=h;load[k]+=h;setupH[k]+=s;byCat[prods[i].p.m][k]+=h});
+    res.wc.push({load,setupH,byCat})}
+  const unmetF=Array(K).fill(0);
+  res.wc.forEach((o,w)=>{o.reg=[];o.ot=[];o.over=[];o.util=[];o.capR=[];o.capO=[];
+    for(let k=0;k<K;k++){const c=cap[w][k],L=o.load[k];const r=Math.min(L,c.reg),t=Math.min(Math.max(0,L-c.reg),c.ot),v=Math.max(0,L-c.reg-c.ot);
+      o.reg.push(r);o.ot.push(t);o.over.push(v);o.util.push(c.reg>0?L/c.reg:(L>0?9:0));o.capR.push(c.reg);o.capO.push(c.reg+c.ot);
+      if(P.overflow==='unmet'&&L>0)unmetF[k]=Math.max(unmetF[k],v/L)}});
+  const shDiff=w=>{const s=P.wc[w].sh;return s===1?0:s===2?P.sd2/200:(P.sd2+P.sd3)/300};
+  const wageF=k=>k>=P.wageEff?1+P.wageInc/100:1,matF=k=>k>=P.matEff?1+P.matInfl/100:1,cmF=k=>k>=P.matEff?1+P.cmInfl/100:1;
+  const Z=()=>Array(K).fill(0);
+  const C={material:Z(),cm:Z(),labor:Z(),ot:Z(),sub:Z(),voh:Z(),fix:Z(),carry:Z()};const rev=Z(),lost=Z();
+  const wcCost=res.wc.map(()=>({labor:Z(),ot:Z(),sub:Z(),voh:Z(),fix:Z(),lh:Z(),oth:Z()}));
+  res.wc.forEach((o,w)=>{const x=P.wc[w],c=wcCost[w];for(let k=0;k<K;k++){const rate=x.rate*wageF(k);
+    c.labor[k]=o.reg[k]*x.crew*rate*(1+shDiff(w))*(1+P.burden/100);c.ot[k]=o.ot[k]*x.crew*rate*(1+P.otPrem/100)*1.10;
+    c.sub[k]=P.overflow==='sub'?o.over[k]*(x.crew*rate*(1+P.burden/100)+x.voh)*P.subMult:0;c.voh[k]=(o.reg[k]+o.ot[k])*x.voh;
+    c.fix[k]=(x.st*x.fix+x.sh*x.sup)*(1+P.fixAdj/100);c.lh[k]=o.reg[k]*x.crew;c.oth[k]=o.ot[k]*x.crew;
+    ['labor','ot','sub','voh','fix'].forEach(n=>C[n][k]+=c[n][k])}});
+  const plantFix=P.plantFix*(1+P.fixAdj/100);for(let k=0;k<K;k++)C.fix[k]+=plantFix;
+  const pc=prods.map(({p,r},i)=>{const c=P.cats[p.m];let units=0,built=0,mat=0,cm=0,carry=0,cumP=0,cumD=0,stH=0,labH=0;const alloc={labor:0,ot:0,sub:0,voh:0,fix:0};
+    const stdc=p.p*c.bom/100+sum(r.min.map((m,w)=>m/60*P.wc[w].crew*P.wc[w].rate*(1+P.burden/100)));
+    for(let k=0;k<K;k++){const uf=r.make?unmetF[k]:0;const b=prod[i][k]*(1-uf);built+=b;units+=dem[i][k];
+      if(r.make){const v=b*p.p*c.bom/100*(1+P.scrap/100)*matF(k);mat+=v;C.material[k]+=v}else{const v=b*p.p*c.cm/100*cmF(k);cm+=v;C.cm[k]+=v}
+      rev[k]+=dem[i][k]*(1-uf)*p.p;lost[k]+=dem[i][k]*uf*p.p;res.units[k]+=dem[i][k];res.built[k]+=b;
+      cumP+=b;cumD+=dem[i][k]*(1-uf);const inv=Math.max(0,cumP-cumD);const cc=inv*stdc*P.carry/1200;carry+=cc;C.carry[k]+=cc;
+      if(r.make)for(let w=0;w<W;w++){const L=res.wc[w].load[k];if(L>0){const sh=pH[i][w][k]/L;['labor','ot','sub','voh','fix'].forEach(n=>alloc[n]+=wcCost[w][n][k]*sh);stH+=pH[i][w][k];labH+=pH[i][w][k]*P.wc[w].crew}}}
+    return {i,p,r,units,built,mat,cm,alloc,carry,stH,labH,stdc}});
+  const totStH=sum(pc.map(x=>x.stH))||1;const unFix=sum(C.fix)-sum(pc.map(x=>x.alloc.fix));
+  pc.forEach(x=>{x.alloc.fix+=unFix*x.stH/totStH;x.conv=x.alloc.labor+x.alloc.ot+x.alloc.sub+x.alloc.voh+x.alloc.fix;x.total=x.mat+x.cm+x.conv+x.carry;
+    x.uc=x.built>0?x.total/x.built:0;x.margin=x.built>0?1-x.uc/x.p.p:null;x.runMin=sum(x.r.min);x.labMin=sum(x.r.min.map((m,w)=>m*P.wc[w].crew))});
+  C.total=MONTHS.map((_,k)=>C.material[k]+C.cm[k]+C.labor[k]+C.ot[k]+C.sub[k]+C.voh[k]+C.fix[k]+C.carry[k]);
+  Object.assign(res,{C,rev,lost,wcCost,pc,unmetF});
+  res.fte=res.wc.map((o,w)=>{const x=P.wc[w];return MONTHS.map((_,k)=>{const hp=x.hr*cap[w][k].wd*x.oee/100;return hp>0?(o.reg[k]+o.ot[k])*x.crew/hp:0})});
+  res.staffed=P.wc.map(x=>x.st*x.sh*x.crew);
+  const T={units:sum(res.units),built:sum(res.built),stH:sum(res.wc.map(o=>sum(o.load))),labH:sum(res.wc.map((o,w)=>sum(o.load)*P.wc[w].crew)),
+    otH:sum(wcCost.map(c=>sum(c.oth))),overH:sum(res.wc.map(o=>sum(o.over)))};
+  ['material','cm','labor','ot','sub','voh','fix','carry'].forEach(n=>T[n]=sum(C[n]));T.total=sum(C.total);T.rev=sum(rev);T.lost=sum(lost);
+  let pk={v:0,w:0,k:0},over=0;for(let k=0;k<K;k++){let mx=0;res.wc.forEach((o,w)=>{if(o.util[k]>pk.v)pk={v:o.util[k],w,k};mx=Math.max(mx,o.util[k])});if(mx>1.0001)over++}
+  T.peak=pk;T.overMonths=over;T.uc=T.built?T.total/T.built:0;T.conv=T.labor+T.ot+T.sub+T.voh+T.fix;T.gm=T.rev?1-T.total/T.rev:0;
+  T.avgUtil=T.stH/sum(res.wc.map(o=>sum(o.capR)));res.T=T;return res}
+
+function applyGroups(base,scn,groups){const p=clone(base);groups.forEach(g=>GROUPS[g].forEach(f=>{if(f.startsWith('wc.')){const k=f.slice(3);p.wc.forEach((w,j)=>w[k]=scn.wc[j][k])}else p[f]=clone(scn[f])}));return p}
+function groupChanged(g,a,b){return GROUPS[g].some(f=>{if(f.startsWith('wc.')){const k=f.slice(3);return a.wc.some((w,j)=>w[k]!==b.wc[j][k])}return JSON.stringify(a[f])!==JSON.stringify(b[f])})}
+
+/* rail */
+const monthOpts=none=>(none?'<option value="-1">None</option>':'')+MONTHS.map((_,k)=>`<option value="${k}">${mlabel(k)}</option>`).join('');
+$('#evMonth').innerHTML=monthOpts(true);$('#wageEff').innerHTML=monthOpts();$('#matEff').innerHTML=monthOpts();
+$('#horizon').textContent=mlabel(0)+' to '+mlabel(K-1);
+Object.entries(PRESETS).forEach(([k,v])=>$('#preset').insertAdjacentHTML('beforeend',`<option value="${k}">${v.name}</option>`));
+$('#custom12').innerHTML=MN.map((m,i)=>`<label>${m}<input type="number" step="0.05" min="0" data-cm="${i}"></label>`).join('');
+const OUTF={intensity:v=>Math.round(v*100)+'%',growth:v=>(v>0?'+':'')+v+'%',burden:v=>v+'%',otPrem:v=>v+'%',otCap:v=>v+'%',prodGain:v=>v+'%',subMult:v=>(+v).toFixed(2)+'×',scrap:v=>(+v).toFixed(1)+'%',holidays:v=>v+' days',runs:v=>v,rework:v=>(+v).toFixed(1)+'%',fixAdj:v=>(v>0?'+':'')+v+'%',window:v=>v+(v==1?' month':' months'),carry:v=>v+'%'};
+function syncRail(){
+  $$('[data-k]').forEach(el=>{const v=par[el.dataset.k];if(document.activeElement!==el&&el.value!=String(v))el.value=v});
+  $$('[data-o]').forEach(o=>{const k=o.dataset.o;o.textContent=OUTF[k]?OUTF[k](par[k]):par[k]});
+  $$('[data-cm]').forEach(el=>{if(document.activeElement!==el)el.value=(+par.custom[+el.dataset.cm]).toFixed(2)});
+  $('#customBox').hidden=par.profile!=='custom';$('#windowBox').hidden=par.strategy!=='prebuild';$('#subMultBox').hidden=par.overflow!=='sub';
+  $$('details.grp').forEach(d=>{const g=d.dataset.g;const gs=g==='labor'?['labor','prod']:[g];d.querySelector('.chg').textContent=gs.some(x=>groupChanged(x,par,BASE))?'changed':''});
+  const n=Object.keys(GROUPS).filter(g=>groupChanged(g,par,BASE)).length;$('#dirty').textContent=n?`${n} group${n>1?'s':''} changed`:'Baseline';
+  drawSpark()}
+function drawSpark(){const svg=$('#seasSpark');const W=Math.max(200,svg.clientWidth||300),H=46;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const prof=par.profile==='plan'?null:(par.profile==='custom'?par.custom:PROFILES[par.profile]);let vals;
+  if(!prof){const tot=MONTHS.map((_,k)=>sum(PR.map(p=>p.dem[k])));const a=sum(tot)/K;vals=tot.map(v=>Math.max(0,1+(v/a-1)*par.intensity))}
+  else{vals=MONTHS.map((_,k)=>Math.max(0,1+(prof[calM(k)-1]-1)*par.intensity));const m=sum(vals)/K||1;vals=vals.map(v=>v/m)}
+  const mx=Math.max(1.6,...vals),bw=W/K,y=v=>H-12-v/mx*(H-16);
+  svg.innerHTML=`<line x1="0" x2="${W}" y1="${y(1)}" y2="${y(1)}" stroke="var(--ink-2)" stroke-dasharray="2 3"/>`+vals.map((v,k)=>`<rect x="${k*bw+1}" y="${y(v)}" width="${bw-2}" height="${H-12-y(v)}" fill="var(--plan)" opacity=".7"><title>${mlabel(k)}: ${v.toFixed(2)}</title></rect>`).join('')+
+    `<text x="0" y="${H-1}" style="font-size:10px;fill:var(--ink-2)">${mlabel(0)}</text><text x="${W}" y="${H-1}" text-anchor="end" style="font-size:10px;fill:var(--ink-2)">${mlabel(K-1)}</text>`}
+$$('[data-k]').forEach(el=>{el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{const k=el.dataset.k,v=el.value;par[k]=['profile','overflow','strategy'].includes(k)?v:(parseFloat(v)||0);changed()})});
+$$('[data-cm]').forEach(el=>el.addEventListener('change',()=>{par.custom[+el.dataset.cm]=Math.max(0,parseFloat(el.value)||0);changed()}));
+$('#preset').addEventListener('change',e=>{const k=e.target.value;if(!k)return;par=clone(BASE);PRESETS[k].apply(par);$('#scnName').value=PRESETS[k].name;e.target.value='';changed();toast('Loaded '+PRESETS[k].name)});
+$('#resetScn').onclick=()=>{par=clone(BASE);$('#scnName').value='My scenario';changed();toast('Back to baseline')};
+$('#saveScn').onclick=()=>{const name=$('#scnName').value.trim()||'Scenario';const i=saved.findIndex(s=>s.name===name);const e={name,par:clone(par),at:Date.now()};if(i>=0)saved[i]=e;else saved.push(e);if(saved.length>8)saved.shift();LS.set('capmodel-scenarios-v1',saved);toast('Saved '+name);if(ui.view==='scenarios')renderScenarios()};
+
+const tip=$('#tip');
+function showTip(e,h){tip.innerHTML=h;tip.style.display='block';const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){tip.style.display='none'}
+function nice(m){if(m<=0)return 10;const e=Math.pow(10,Math.floor(Math.log10(m)));for(const k of [1,1.2,1.5,2,2.5,3,4,5,6,8,10])if(k*e>=m)return k*e;return 10*e}
+
+let R=null,RB=null,tmr=null;
+function changed(){syncRail();clearTimeout(tmr);tmr=setTimeout(compute,60)}
+function compute(){if(!RB)RB=run(BASE);R=run(par);renderKPIs();renderView()}
+function delta(a,b,goodDown,fd){if(!b&&!a)return '<div class="d">no change</div>';const d=b?a/b-1:1;if(Math.abs(d)<0.0005)return '<div class="d">same as baseline</div>';
+  const up=d>0;return `<div class="d ${goodDown?(up?'up':'dn'):(up?'upg':'dnb')}">${up?'▲':'▼'} ${fd?fd(a-b):spct(d)} vs baseline</div>`}
+function renderKPIs(){const T=R.T,B=RB.T;
+  const it=[[num(T.built),'Units to build',delta(T.built,B.built,false)],
+    [num(T.stH),'Station hours needed',`<div class="d">${num(T.labH)} labor hours, ${pct(T.avgUtil)} average load</div>`],
+    [pct(T.peak.v),`Peak load, ${WCN[T.peak.w]} in ${mlabel(T.peak.k)}`,delta(T.peak.v,B.peak.v,true,v=>(v>0?'+':'−')+Math.abs(v*100).toFixed(0)+' pts')],
+    [T.overMonths+' of '+K,'Months over regular capacity',T.overMonths===B.overMonths?'<div class="d">same as baseline</div>':`<div class="d ${T.overMonths>B.overMonths?'up':'dn'}">${T.overMonths>B.overMonths?'▲':'▼'} ${Math.abs(T.overMonths-B.overMonths)} vs baseline</div>`],
+    [num(T.otH),'Overtime labor hours',delta(T.otH,B.otH,true)],
+    par.overflow==='sub'?[usd(T.sub),'Subcontracted overflow',delta(T.sub,B.sub,true)]:[usd(T.lost),'Revenue lost to capacity',`<div class="d">${num(T.overH)} station hours unbuilt</div>`],
+    [usd(T.total),'Total manufacturing cost',delta(T.total,B.total,true)],
+    [usd2(T.uc),`Cost per unit, ${pct(T.gm,1)} gross margin`,delta(T.uc,B.uc,true)]];
+  $('#kpis').innerHTML=it.map(x=>`<div class="kpi"><div class="v">${x[0]}</div><div class="l">${x[1]}</div>${x[2]}</div>`).join('')}
+function renderView(){({capacity:renderCapacity,cost:renderCost,labor:renderLabor,products:renderProducts,setup:renderSetup,scenarios:renderScenarios,method:()=>{}})[ui.view]()}
+$$('nav.tabs button').forEach(b=>b.onclick=()=>{ui.view=b.dataset.view;$$('nav.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));$$('section.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+ui.view));renderView()});
+
+/* capacity */
+function ucls(u){const ot=1+par.otCap/100;return u<.7?'u0':u<.85?'u1':u<=1.0001?'u2':u<=ot+1e-4?'u3':'u4'}
+function renderCapacity(){
+  let h=`<thead><tr><th class="l">Work center</th>${MONTHS.map((_,k)=>`<th>${mlabel(k)}</th>`).join('')}<th>Average</th></tr></thead><tbody>`;
+  R.wc.forEach((o,w)=>{const x=par.wc[w];h+=`<tr><td class="l"><span class="wcname">${WCN[w]}</span><span class="wcsub">${x.st} stations, ${x.sh} shift${x.sh>1?'s':''}, ${x.dpw} days</span></td>`+o.util.map((u,k)=>`<td class="cell ${ucls(u)} ${ui.wc===w?'sel':''}" data-w="${w}" data-k="${k}">${Math.round(u*100)}%</td>`).join('')+`<td><b>${pct(sum(o.load)/sum(o.capR))}</b></td></tr>`});
+  h+=`<tr class="tot"><td class="l">Bottleneck</td>${MONTHS.map((_,k)=>{let b=0,bw=0;R.wc.forEach((o,w)=>{if(o.util[k]>b){b=o.util[k];bw=w}});return `<td class="${ucls(b)}" title="${WCN[bw]} ${pct(b)}">${WCN[bw].split(/[ -]/)[0]}</td>`}).join('')}<td></td></tr></tbody>`;
+  $('#heat').innerHTML=h;
+  $$('#heat td.cell').forEach(td=>{td.onclick=()=>{ui.wc=+td.dataset.w;renderCapacity()};
+    td.onmousemove=e=>{const w=+td.dataset.w,k=+td.dataset.k,o=R.wc[w];showTip(e,`<b>${WCN[w]}, ${mlabel(k)}</b><table><tr><td>Load</td><td>${num(o.load[k])} h</td></tr><tr><td>of which setup</td><td>${num(o.setupH[k])} h</td></tr><tr><td>Regular capacity</td><td>${num(o.capR[k])} h</td></tr><tr><td>Overtime used</td><td>${num(o.ot[k])} h</td></tr><tr><td>Beyond overtime</td><td>${num(o.over[k])} h</td></tr><tr><td>Working days</td><td>${R.cap[w][k].wd.toFixed(1)}</td></tr></table>`)};td.onmouseleave=hideTip});
+  $('#wcSeg').innerHTML=WCN.map((n,w)=>`<button data-w="${w}" aria-pressed="${ui.wc===w}">${n}</button>`).join('');
+  $$('#wcSeg button').forEach(b=>b.onclick=()=>{ui.wc=+b.dataset.w;renderCapacity()});
+  drawLoad();
+  let t=`<thead><tr><th class="l">Work center</th><th>Station hours</th><th>Labor hours</th><th>Regular capacity</th><th>Avg utilization</th><th>Overtime h</th><th>Beyond OT h</th><th>Setup share</th><th>Peak month</th></tr></thead><tbody>`;let s=[0,0,0,0,0];
+  R.wc.forEach((o,w)=>{const st=sum(o.load),lab=st*par.wc[w].crew,cr=sum(o.capR),ot=sum(o.ot),ov=sum(o.over),su=sum(o.setupH);const pk=o.util.indexOf(Math.max(...o.util));s[0]+=st;s[1]+=lab;s[2]+=cr;s[3]+=ot;s[4]+=ov;
+    t+=`<tr><td class="l">${WCN[w]}<span class="wcsub">${WCD[w]}</span></td><td>${num(st)}</td><td>${num(lab)}</td><td>${num(cr)}</td><td>${pct(st/cr)}</td><td>${num(ot)}</td><td>${num(ov)}</td><td>${pct(su/st,1)}</td><td>${mlabel(pk)}, ${pct(o.util[pk])}</td></tr>`});
+  $('#hoursTable').innerHTML=t+`<tr class="tot"><td class="l">Plant</td><td>${num(s[0])}</td><td>${num(s[1])}</td><td>${num(s[2])}</td><td>${pct(s[0]/s[2])}</td><td>${num(s[3])}</td><td>${num(s[4])}</td><td></td><td></td></tr></tbody>`}
+const catColor=c=>`var(--c${CATS.indexOf(c)%10})`;
+function drawLoad(){const w=ui.wc,o=R.wc[w],svg=$('#loadChart'),x=par.wc[w];
+  const W=Math.max(320,svg.clientWidth||900),H=300,L=56,B=26,T=12,cw=(W-L-8)/K;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const max=nice(Math.max(...o.load,...o.capO)*1.06),y=v=>T+(H-T-B)*(1-v/max);const cats=CATS.filter(c=>sum(o.byCat[c])>0);
+  $('#loadTitle').textContent=WCN[w]+': load vs capacity';
+  $('#loadSub').textContent=`Station hours needed each month, stacked by category, against regular capacity (${x.st} stations × ${x.sh} shifts × ${x.hr} h × working days × ${x.oee}% efficiency) and the overtime ceiling.`;
+  $('#loadLegend').innerHTML=cats.map(c=>`<span><span class="sw" style="background:${catColor(c)}"></span>${c}</span>`).join('')+`<span><span class="sw line" style="background:var(--ink)"></span>Regular capacity</span><span><span class="sw dash"></span>With overtime</span><span><span class="sw" style="background:var(--risk);height:3px"></span>Beyond overtime</span>`;
+  let g='';for(let i=0;i<=4;i++){const v=max/4*i;g+=`<line class="grid" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${num(v)}</text>`}
+  for(let k=0;k<K;k++){let acc=0;const bx=L+k*cw+cw*.16,bw=cw*.68;cats.forEach(c=>{const v=o.byCat[c][k];if(!v)return;g+=`<rect x="${bx}" y="${y(acc+v)}" width="${bw}" height="${y(acc)-y(acc+v)}" fill="${catColor(c)}" opacity=".9"/>`;acc+=v});
+    if(o.over[k]>0)g+=`<rect x="${bx-2}" y="${y(o.load[k])-4}" width="${bw+4}" height="4" fill="var(--risk)"/>`;
+    g+=`<rect class="hit" x="${L+k*cw}" y="${T}" width="${cw}" height="${H-T-B}" fill="transparent" data-k="${k}"/>`;if(k%(W<640?3:1)===0)g+=`<text x="${L+k*cw+cw/2}" y="${H-8}" text-anchor="middle">${mlabel(k)}</text>`}
+  const step=a=>a.map((v,k)=>`${k?'L':'M'}${L+k*cw} ${y(v)} L${L+(k+1)*cw} ${y(v)}`).join(' ');
+  g+=`<path d="${step(o.capR)}" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="${step(o.capO)}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="5 4"/><line class="axis" x1="${L}" x2="${W}" y1="${y(0)}" y2="${y(0)}"/>`;
+  svg.innerHTML=g;
+  $$('#loadChart .hit').forEach(r=>{const k=+r.dataset.k;r.onmousemove=e=>showTip(e,`<b>${mlabel(k)}</b><table>${cats.filter(c=>o.byCat[c][k]).map(c=>`<tr><td>${c}</td><td>${num(o.byCat[c][k])} h</td></tr>`).join('')}<tr><td><b>Load</b></td><td><b>${num(o.load[k])} h</b></td></tr><tr><td>Regular capacity</td><td>${num(o.capR[k])} h</td></tr><tr><td>With overtime</td><td>${num(o.capO[k])} h</td></tr><tr><td>Utilization</td><td>${pct(o.util[k])}</td></tr></table>`);r.onmouseleave=hideTip})}
+
+/* cost */
+const CK=[['material','Material','--k-mat'],['cm','Contract manufacturing','--k-cm'],['labor','Regular labor','--k-lab'],['ot','Overtime','--k-ot'],['sub','Subcontract','--k-sub'],['voh','Variable overhead','--k-voh'],['fix','Fixed overhead','--k-fix'],['carry','Carrying cost','--k-car']];
+function renderCost(){
+  $$('#costSeg button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.cv===ui.cv);b.onclick=()=>{ui.cv=b.dataset.cv;renderCost()}});
+  const keys=CK.filter(c=>ui.cv==='all'||!['material','cm'].includes(c[0])).filter(c=>sum(R.C[c[0]])>0||sum(RB.C[c[0]])>0);
+  $('#costLegend').innerHTML=keys.map(c=>`<span><span class="sw" style="background:var(${c[2]})"></span>${c[1]}</span>`).join('')+`<span><span class="sw dash"></span>Baseline total</span>`;
+  const svg=$('#costChart');const W=Math.max(320,svg.clientWidth||900),H=300,L=60,B=26,T=12,cw=(W-L-8)/K;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const tot=MONTHS.map((_,k)=>sum(keys.map(c=>R.C[c[0]][k]))),bt=MONTHS.map((_,k)=>sum(keys.map(c=>RB.C[c[0]][k])));
+  const max=nice(Math.max(...tot,...bt)*1.06),y=v=>T+(H-T-B)*(1-v/max);
+  let g='';for(let i=0;i<=4;i++){const v=max/4*i;g+=`<line class="grid" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${usd(v)}</text>`}
+  for(let k=0;k<K;k++){let acc=0;const bx=L+k*cw+cw*.16,bw=cw*.68;keys.forEach(c=>{const v=R.C[c[0]][k];if(v<=0)return;g+=`<rect x="${bx}" y="${y(acc+v)}" width="${bw}" height="${y(acc)-y(acc+v)}" fill="var(${c[2]})"/>`;acc+=v});
+    g+=`<rect class="hit" x="${L+k*cw}" y="${T}" width="${cw}" height="${H-T-B}" fill="transparent" data-k="${k}"/>`;if(k%(W<640?3:1)===0)g+=`<text x="${L+k*cw+cw/2}" y="${H-8}" text-anchor="middle">${mlabel(k)}</text>`}
+  g+=`<path d="${bt.map((v,k)=>`${k?'L':'M'}${L+k*cw+cw*.08} ${y(v)} L${L+(k+1)*cw-cw*.08} ${y(v)}`).join(' ')}" fill="none" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1.5"/><line class="axis" x1="${L}" x2="${W}" y1="${y(0)}" y2="${y(0)}"/>`;
+  svg.innerHTML=g;
+  $$('#costChart .hit').forEach(r=>{const k=+r.dataset.k;r.onmousemove=e=>showTip(e,`<b>${mlabel(k)}</b><table>${keys.filter(c=>R.C[c[0]][k]>0).map(c=>`<tr><td>${c[1]}</td><td>${usd(R.C[c[0]][k])}</td></tr>`).join('')}<tr><td><b>Total shown</b></td><td><b>${usd(tot[k])}</b></td></tr><tr><td>Baseline</td><td>${usd(bt[k])}</td></tr><tr><td>Units built</td><td>${num(R.built[k])}</td></tr></table>`);r.onmouseleave=hideTip});
+  drawBridge();drawTornado();
+  let t=`<thead><tr><th class="l">Cost line</th><th>Baseline</th><th>Scenario</th><th>Change</th><th>Per unit, scenario</th><th>Share of cost</th></tr></thead><tbody>`;
+  CK.forEach(([k,n])=>{const a=RB.T[k],b=R.T[k];if(!a&&!b)return;const d=b-a;t+=`<tr><td class="l">${n}</td><td>${usd(a)}</td><td>${usd(b)}</td><td style="color:${d>Math.abs(a)*5e-4?'var(--risk)':d<-Math.abs(a)*5e-4?'var(--plan)':'inherit'}">${Math.abs(d)<1?'–':(d>0?'+':'')+usd(d)}</td><td>${usd2(R.T.built?b/R.T.built:0)}</td><td>${pct(b/R.T.total,1)}</td></tr>`});
+  const dT=R.T.total-RB.T.total,dR=R.T.rev-RB.T.rev,dG=(R.T.gm-RB.T.gm)*100;
+  t+=`<tr class="tot"><td class="l">Total manufacturing cost</td><td>${usd(RB.T.total)}</td><td>${usd(R.T.total)}</td><td>${Math.abs(dT)<1?'–':(dT>0?'+':'')+usd(dT)}</td><td>${usd2(R.T.uc)}</td><td>100%</td></tr>
+  <tr><td class="l">Revenue at list price</td><td>${usd(RB.T.rev)}</td><td>${usd(R.T.rev)}</td><td>${Math.abs(dR)<1?'–':(dR>0?'+':'')+usd(dR)}</td><td></td><td></td></tr>
+  <tr><td class="l">Gross margin</td><td>${pct(RB.T.gm,1)}</td><td>${pct(R.T.gm,1)}</td><td>${Math.abs(dG)<.05?'–':(dG>0?'+':'')+dG.toFixed(1)+' pts'}</td><td></td><td></td></tr></tbody>`;
+  $('#costTable').innerHTML=t}
+function drawBridge(){const order=['demand','strategy','ops','prod','labor','material'];let cur=clone(BASE),prev=RB.T.total;const steps=[];
+  order.forEach(g=>{if(!groupChanged(g,BASE,par)){steps.push([GLABEL[g],0]);return}cur=applyGroups(cur,par,[g]);const t=run(cur).T.total;steps.push([GLABEL[g],t-prev]);prev=t});
+  const svg=$('#bridge');const W=Math.max(300,svg.clientWidth||520),rh=34,H=(steps.length+2)*rh+14,L=Math.min(160,W*.36),Rr=W-84;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const vals=[RB.T.total];let acc0=RB.T.total;steps.forEach(s=>{acc0+=s[1];vals.push(acc0)});const span=Math.max(...vals)-Math.min(...vals);
+  const lo=Math.min(...vals)-Math.max(span*.6,Math.min(...vals)*.004),hi=Math.max(...vals)+span*.05+1;const x=v=>L+(Rr-L)*(v-lo)/(hi-lo);
+  let g='',acc=RB.T.total,yy=6;
+  const bar=(lab,a,b,col,bold)=>{const x1=x(Math.min(a,b)),x2=x(Math.max(a,b));g+=`<text x="${L-8}" y="${yy+rh/2+4}" text-anchor="end" style="${bold?'fill:var(--ink);font-weight:650':''}">${lab}</text><rect x="${x1}" y="${yy+6}" width="${Math.max(2,x2-x1)}" height="${rh-12}" fill="${col}" rx="2"/>`};
+  bar('Baseline',lo,RB.T.total,'var(--k-mat)',true);g+=`<text x="${x(RB.T.total)+6}" y="${yy+rh/2+4}">${usd(RB.T.total)}</text>`;yy+=rh;
+  steps.forEach(([n,d])=>{const b=acc+d;bar(n,acc,b,d>0?'var(--risk)':d<0?'var(--plan)':'var(--rule)');g+=`<text x="${x(Math.max(acc,b))+6}" y="${yy+rh/2+4}">${Math.abs(d)<1?'no change':(d>0?'+':'−')+usd(Math.abs(d))}</text>`;acc=b;yy+=rh});
+  bar('Scenario',lo,R.T.total,'var(--ink)',true);g+=`<text x="${x(R.T.total)+6}" y="${yy+rh/2+4}" style="fill:var(--ink);font-weight:650">${usd(R.T.total)}</text>`;
+  svg.innerHTML=g+`<text x="${L}" y="${H-2}" style="font-size:10px">Axis starts at ${usd(lo)} so the steps are visible</text>`}
+function drawTornado(){const D=[
+    ['Demand volume ±10%',p=>{p.growth-=10},p=>{p.growth+=10}],
+    ['Material cost ±10%',p=>{Object.values(p.cats).forEach(c=>{c.bom*=.9;c.cm*=.9})},p=>{Object.values(p.cats).forEach(c=>{c.bom*=1.1;c.cm*=1.1})}],
+    ['Labor rates ±10%',p=>{p.wc.forEach(w=>w.rate*=.9)},p=>{p.wc.forEach(w=>w.rate*=1.1)}],
+    ['Run times ±10%',p=>{p.runScale*=.9},p=>{p.runScale*=1.1}],
+    ['Efficiency ±5 pts',p=>{p.wc.forEach(w=>w.oee=Math.min(100,w.oee+5))},p=>{p.wc.forEach(w=>w.oee=Math.max(10,w.oee-5))}],
+    ['Fixed overhead ±10%',p=>{p.fixAdj-=10},p=>{p.fixAdj+=10}],
+    ['Overtime premium ±25 pts',p=>{p.otPrem=Math.max(0,p.otPrem-25)},p=>{p.otPrem+=25}],
+    ['Seasonal intensity ±25%',p=>{p.intensity=Math.max(0,p.intensity-.25)},p=>{p.intensity+=.25}]];
+  const base=R.T.total;const rows=D.map(([n,lo,hi])=>{const a=clone(par);lo(a);const b=clone(par);hi(b);return [n,run(a).T.total-base,run(b).T.total-base]}).sort((a,b)=>Math.max(Math.abs(b[1]),Math.abs(b[2]))-Math.max(Math.abs(a[1]),Math.abs(a[2])));
+  const svg=$('#tornado');const W=Math.max(300,svg.clientWidth||520),rh=30,H=rows.length*rh+36,L=Math.min(165,W*.36);svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const m=Math.max(...rows.map(r=>Math.max(Math.abs(r[1]),Math.abs(r[2]))))*1.75||1,cx=L+(W-L-8)/2,x=v=>cx+v/m*(W-L-8)/2;
+  let g=`<line x1="${cx}" x2="${cx}" y1="4" y2="${H-26}" stroke="var(--ink-2)"/>`;
+  rows.forEach(([n,a,b],i)=>{const yy=6+i*rh;g+=`<text x="${L-8}" y="${yy+rh/2+2}" text-anchor="end">${n}</text>`;
+    [[a,.7],[b,1]].forEach(([v,op])=>{const x1=x(Math.min(0,v)),x2=x(Math.max(0,v));g+=`<rect x="${x1}" y="${yy+4}" width="${Math.max(1,x2-x1)}" height="${rh-10}" fill="${v>0?'var(--risk)':'var(--plan)'}" opacity="${op}"><title>${n}: ${v>0?'+':'−'}${usd(Math.abs(v))}</title></rect>`});
+    const hiv=Math.max(a,b),lov=Math.min(a,b);if(hiv>0)g+=`<text x="${x(hiv)+4}" y="${yy+rh/2+2}">+${usd(hiv)}</text>`;if(lov<0)g+=`<text x="${x(lov)-4}" y="${yy+rh/2+2}" text-anchor="end">−${usd(-lov)}</text>`});
+  svg.innerHTML=g+`<text x="${cx}" y="${H-8}" text-anchor="middle">Change in total cost from ${usd(base)}; green lowers cost, red raises it</text>`}
+
+/* labor */
+function renderLabor(){
+  let h=`<thead><tr><th class="l">Work center</th><th>Staffed</th>${MONTHS.map((_,k)=>`<th>${mlabel(k)}</th>`).join('')}<th>Peak gap</th></tr></thead><tbody>`;const tn=Array(K).fill(0);let ts=0;
+  R.fte.forEach((f,w)=>{const s=R.staffed[w];ts+=s;f.forEach((v,k)=>tn[k]+=v);const gap=Math.max(...f)-s;
+    h+=`<tr><td class="l">${WCN[w]}<span class="wcsub">${par.wc[w].crew} per station × ${par.wc[w].st} × ${par.wc[w].sh} shift${par.wc[w].sh>1?'s':''}</span></td><td><b>${num(s,1)}</b></td>`+f.map(v=>`<td class="${v>s*1.0005?'u4':v>s*.9?'u2':''}">${v.toFixed(1)}</td>`).join('')+`<td>${gap>0.05?`<span class="badge risk">+${gap.toFixed(1)} short</span>`:`<span class="badge ok">${(-gap).toFixed(1)} spare</span>`}</td></tr>`});
+  $('#fteTable').innerHTML=h+`<tr class="tot"><td class="l">Plant</td><td>${num(ts,1)}</td>${tn.map(v=>`<td class="${v>ts?'u4':''}">${v.toFixed(1)}</td>`).join('')}<td></td></tr></tbody>`;
+  let t=`<thead><tr><th class="l">Work center</th><th>Base rate</th><th>Loaded rate</th><th>Regular hours</th><th>Regular pay</th><th>Overtime hours</th><th>Overtime pay</th><th>Subcontract</th><th>Total</th><th>Cost per labor hour</th></tr></thead><tbody>`;const T=[0,0,0,0,0,0];
+  R.wcCost.forEach((c,w)=>{const x=par.wc[w];const sd=x.sh===1?0:x.sh===2?par.sd2/200:(par.sd2+par.sd3)/300;const ld=x.rate*(1+sd)*(1+par.burden/100);
+    const lh=sum(c.lh),lp=sum(c.labor),oh=sum(c.oth),op=sum(c.ot),sb=sum(c.sub),tt=lp+op+sb;[lh,lp,oh,op,sb,tt].forEach((v,i)=>T[i]+=v);
+    t+=`<tr><td class="l">${WCN[w]}</td><td>${usd2(x.rate)}</td><td>${usd2(ld)}</td><td>${num(lh)}</td><td>${usd(lp)}</td><td>${num(oh)}</td><td>${usd(op)}</td><td>${usd(sb)}</td><td><b>${usd(tt)}</b></td><td>${usd2((lp+op)/(lh+oh||1))}</td></tr>`});
+  $('#laborTable').innerHTML=t+`<tr class="tot"><td class="l">Plant</td><td></td><td></td><td>${num(T[0])}</td><td>${usd(T[1])}</td><td>${num(T[2])}</td><td>${usd(T[3])}</td><td>${usd(T[4])}</td><td>${usd(T[5])}</td><td>${usd2((T[1]+T[3])/(T[0]+T[2]||1))}</td></tr></tbody>`}
+
+/* products */
+$('#pcat').innerHTML='<option value="">All categories</option>'+CATS.map(c=>`<option>${c}</option>`).join('');
+$('#pq').addEventListener('input',e=>{ui.pq=e.target.value;renderProducts()});
+$('#pcat').addEventListener('change',e=>{ui.pcat=e.target.value;renderProducts()});
+const PCOLS=[['i','Product','l'],['units','Units'],['runMin','Build min'],['matU','Material'],['convU','Conversion'],['uc','Cost / unit'],['price','Price'],['margin','Margin']];
+function pval(x,k){const b=x.built||1;switch(k){case 'i':return x.p.i;case 'matU':return (x.mat+x.cm)/b;case 'convU':return (x.conv+x.carry)/b;case 'price':return x.p.p;case 'margin':return x.margin??-9;default:return x[k]}}
+function renderProducts(){const q=ui.pq.toLowerCase();const list=R.pc.filter(x=>(!ui.pcat||x.p.m===ui.pcat)&&(!q||x.p.i.toLowerCase().includes(q)||x.p.d.toLowerCase().includes(q)));
+  const {k,d}=ui.psort;list.sort((a,b)=>{const x=pval(a,k),y=pval(b,k);return (x<y?-1:x>y?1:0)*d});
+  $('#pcount').textContent=`${list.length} of ${R.pc.length} products. Minutes are per unit.`;
+  if(ui.sel==null)ui.sel=(R.pc.filter(x=>x.r.make).sort((a,b)=>b.units-a.units)[0]||R.pc[0]).p.i;
+  let h='<thead><tr>'+PCOLS.map(c=>`<th class="${c[2]||''} ${k===c[0]?(d>0?'asc':'desc'):''}" data-sort="${c[0]}" tabindex="0">${c[1]}</th>`).join('')+'</tr></thead><tbody>';
+  list.forEach(x=>{h+=`<tr class="click ${ui.sel===x.p.i?'sel':''}" data-i="${x.p.i}" tabindex="0"><td class="l"><b>${x.p.i}</b>${x.r.make?'':' <span class="badge mute">bought</span>'}${routing[x.p.i]?' <span class="badge warn">edited</span>':''}<span class="dim" title="${x.p.d}">${x.p.d}</span></td><td>${num(x.units)}</td><td>${x.r.make?x.runMin.toFixed(1):'–'}</td><td>${usd2(pval(x,'matU'))}</td><td>${usd2(pval(x,'convU'))}</td><td><b>${usd2(x.uc)}</b></td><td>${usd2(x.p.p)}</td><td style="color:${x.margin!=null&&x.margin<.2?'var(--risk)':'inherit'}">${x.margin==null?'–':pct(x.margin,1)}</td></tr>`});
+  if(!list.length)h+='<tr><td colspan="8" class="l" style="padding:24px;color:var(--ink-2)">No products match. Clear the search or pick another category.</td></tr>';
+  $('#prodTable').innerHTML=h+'</tbody>';
+  $$('#prodTable th[data-sort]').forEach(th=>{const go=()=>{const kk=th.dataset.sort;ui.psort={k:kk,d:ui.psort.k===kk?-ui.psort.d:(kk==='i'?1:-1)};renderProducts()};th.onclick=go;th.onkeydown=e=>{if(e.key==='Enter')go()}});
+  $$('#prodTable tr[data-i]').forEach(tr=>{const go=()=>{ui.sel=tr.dataset.i;renderProducts();if(innerWidth<1250)$('#drawer').scrollIntoView({behavior:'smooth'})};tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter')go()}});
+  renderDrawer()}
+function renderDrawer(){const x=R.pc.find(z=>z.p.i===ui.sel),el=$('#drawer');if(!x){el.innerHTML='<p class="note">Pick a product to see its routing, build time and cost.</p>';return}
+  const p=x.p,b=x.built||1;const parts=[['Material',x.mat/b,'--k-mat'],['Contract mfg',x.cm/b,'--k-cm'],['Labor',x.alloc.labor/b,'--k-lab'],['Overtime',x.alloc.ot/b,'--k-ot'],['Subcontract',x.alloc.sub/b,'--k-sub'],['Variable OH',x.alloc.voh/b,'--k-voh'],['Fixed OH',x.alloc.fix/b,'--k-fix'],['Carrying',x.carry/b,'--k-car']].filter(z=>z[1]>=0.005);
+  const uc=sum(parts.map(z=>z[1]))||1;const avgM=Math.max(1,Math.round(x.units/K/par.runs));
+  const hrsFor=w=>sum(R.prod[x.i].map((u,k)=>u>0?u*x.r.min[w]/60*R.pf[k]*(1+(par.wc[w].rw?par.rework/100:0))+par.runs*x.r.setup[w]:0));
+  el.innerHTML=`<div class="phead"><div><h2 style="font-size:22px;margin:0">${p.i}</h2><div class="note" style="margin:2px 0 0">${p.d}</div><div class="note" style="margin:2px 0 0">${p.m}, ${p.b}, sold from ${p.wh} warehouse${p.wh>1?'s':''}</div></div>${x.r.make?'<span class="badge ok">made in-house</span>':'<span class="badge mute">bought finished</span>'}</div>
+  <div class="facts"><div><b>${usd2(x.uc)}</b><span>Cost per unit</span></div><div><b>${usd2(p.p)}</b><span>Price</span></div><div><b>${x.margin==null?'–':pct(x.margin,1)}</b><span>Gross margin</span></div><div><b>${num(x.units)}</b><span>Units, ${K} months</span></div></div>
+  <div class="stackbar">${parts.map(z=>`<i style="width:${z[1]/uc*100}%;background:var(${z[2]})" title="${z[0]} ${usd2(z[1])}"></i>`).join('')}</div>
+  <div class="legend">${parts.map(z=>`<span><span class="sw" style="background:var(${z[2]})"></span>${z[0]} ${usd2(z[1])}</span>`).join('')}</div>
+  ${x.r.make?`<h2 style="font-size:16px;margin:14px 0 4px">Routing</h2><p class="note" style="margin:0 0 6px">Run minutes per unit and setup hours per run. Edits become the standard for every scenario, including the baseline.</p>
+  <div class="scroll-x"><table class="edit" id="rtTable"><thead><tr><th class="l">Work center</th><th>Run min</th><th>Setup h</th><th>Crew</th><th>Labor min</th><th>Hours, horizon</th></tr></thead><tbody>
+  ${x.r.min.map((m,w)=>`<tr><td class="l">${WCN[w]}</td><td><input type="number" step="0.1" min="0" data-rw="${w}" data-f="min" value="${m}"></td><td><input type="number" step="0.05" min="0" data-rw="${w}" data-f="setup" value="${x.r.setup[w]}"></td><td>${par.wc[w].crew}</td><td>${(m*par.wc[w].crew).toFixed(1)}</td><td>${num(hrsFor(w))}</td></tr>`).join('')}
+  <tr class="tot"><td class="l">Total</td><td>${x.runMin.toFixed(1)}</td><td>${sum(x.r.setup).toFixed(2)}</td><td></td><td>${x.labMin.toFixed(1)}</td><td>${num(x.stH)}</td></tr></tbody></table></div>
+  <div style="margin-top:6px"><button class="btn small" id="rtReset" ${routing[p.i]?'':'disabled'}>Restore standard routing</button></div>
+  <h2 style="font-size:16px;margin:16px 0 4px">How long a build takes</h2>
+  <p class="note" style="margin:0 0 4px">Elapsed time for one lot moving through the work centers in sequence. Default lot is one month's volume split across your runs.</p>
+  <div class="calc"><label>Lot size, units<input class="in" type="number" id="lotQ" value="${avgM}" min="1"></label><label>Stations per step<input class="in" type="number" id="lotS" value="1" min="1" max="30"></label></div>
+  <div class="scroll-x"><table id="lotTable"></table></div>`:`<p class="note">This category is bought finished from a contract manufacturer, so it uses no plant hours. Switch it to Make on the Setup tab to route it through the plant.</p>`}
+  <h2 style="font-size:16px;margin:16px 0 4px">Monthly build vs demand</h2><svg class="chart" id="pChart" role="img" aria-label="Monthly demand and build"></svg>`;
+  if(x.r.make){
+    $$('#rtTable input').forEach(inp=>inp.addEventListener('change',()=>{const w=+inp.dataset.rw,f=inp.dataset.f;const o=routing[p.i]||{min:x.r.min.slice(),setup:x.r.setup.slice()};o[f][w]=Math.max(0,parseFloat(inp.value)||0);routing[p.i]=o;LS.set('capmodel-routing-v1',routing);RB=null;compute();toast('Routing updated for '+p.i)}));
+    $('#rtReset').onclick=()=>{delete routing[p.i];LS.set('capmodel-routing-v1',routing);RB=null;compute();toast('Standard routing restored')};
+    const lot=()=>{const q=Math.max(1,+$('#lotQ').value||1),s=Math.max(1,+$('#lotS').value||1);let tot=0,days=0;
+      let h=`<thead><tr><th class="l">Step</th><th>Setup h</th><th>Run h</th><th>Elapsed h</th><th>Working days</th></tr></thead><tbody>`;
+      x.r.min.forEach((m,w)=>{const W_=par.wc[w];const rn=q*m/60*(1+(W_.rw?par.rework/100:0))/Math.min(s,W_.st)/(W_.oee/100);const e=x.r.setup[w]+rn;const dd=e/(W_.sh*W_.hr);tot+=e;days+=dd;
+        h+=`<tr><td class="l">${WCN[w]}</td><td>${x.r.setup[w].toFixed(2)}</td><td>${rn.toFixed(1)}</td><td>${e.toFixed(1)}</td><td>${dd.toFixed(2)}</td></tr>`});
+      $('#lotTable').innerHTML=h+`<tr class="tot"><td class="l">Door to door</td><td></td><td></td><td>${tot.toFixed(1)} h</td><td>${days.toFixed(1)} days</td></tr></tbody>`};
+    $('#lotQ').oninput=lot;$('#lotS').oninput=lot;lot()}
+  const svg=$('#pChart');const W=Math.max(300,svg.clientWidth||520),H=150,L=46,B=22,T=8,cw=(W-L-6)/K;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const d=R.dem[x.i],pr=R.prod[x.i];const max=nice(Math.max(...d,...pr,1)*1.1),y=v=>T+(H-T-B)*(1-v/max);
+  let g='';for(let i=0;i<=2;i++){const v=max/2*i;g+=`<line class="grid" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${num(v)}</text>`}
+  pr.forEach((v,k)=>{g+=`<rect x="${L+k*cw+cw*.2}" y="${y(v)}" width="${cw*.6}" height="${y(0)-y(v)}" fill="var(--plan)" opacity=".75"><title>${mlabel(k)}: build ${num(v)}, demand ${num(d[k])}</title></rect>`;if(k%3===0)g+=`<text x="${L+k*cw+cw/2}" y="${H-6}" text-anchor="middle">${mlabel(k)}</text>`});
+  svg.innerHTML=g+`<polyline fill="none" stroke="var(--ink)" stroke-width="2" points="${d.map((v,k)=>`${L+k*cw+cw/2},${y(v)}`).join(' ')}"/><text x="${W-4}" y="${T+10}" text-anchor="end">bars: build, line: demand</text>`}
+
+/* setup */
+const WCF=[['st','Stations',1],['sh','Shifts'],['dpw','Days / week'],['hr','Hours / shift',0.5],['oee','Efficiency %',1],['crew','Crew / station',0.05],['rate','Base rate $/h',0.5],['voh','Var. OH $/h',0.5],['fix','Fixed $/station/mo',100],['sup','Supervision $/shift/mo',500],['setup','Std setup h',0.05]];
+function renderSetup(){
+  let h=`<thead><tr><th class="l">Work center</th>${WCF.map(f=>`<th>${f[1]}</th>`).join('')}<th>Regular h / mo</th><th>Staffed</th></tr></thead><tbody>`;
+  par.wc.forEach((w,j)=>{const b=BASE.wc[j],regAvg=sum(R.cap[j].map(c=>c.reg))/K;
+    h+=`<tr><td class="l"><span class="wcname">${WCN[j]}</span><span class="wcsub">${WCD[j]}</span></td>`+WCF.map(([k,,st])=>{
+      if(k==='sh'||k==='dpw'){const opts=k==='sh'?[1,2,3]:[5,6,7];return `<td><select data-wc="${j}" data-f="${k}" class="${w[k]!==b[k]?'chg':''}" aria-label="${WCN[j]} ${k}">${opts.map(v=>`<option ${v===w[k]?'selected':''}>${v}</option>`).join('')}</select></td>`}
+      return `<td><input type="number" step="${st}" min="0" data-wc="${j}" data-f="${k}" value="${w[k]}" class="${w[k]!==b[k]?'chg':''}" aria-label="${WCN[j]} ${k}"></td>`}).join('')+`<td>${num(regAvg)}</td><td>${num(w.st*w.sh*w.crew,1)}</td></tr>`});
+  h+=`<tr><td class="l">Plant fixed cost / month</td><td colspan="${WCF.length}" class="l"><input type="number" step="5000" min="0" data-plant="1" value="${par.plantFix}" style="width:120px" class="${par.plantFix!==BASE.plantFix?'chg':''}"> <span class="note">Quality, engineering, planning, facilities and site management.</span></td><td></td><td></td></tr></tbody>`;
+  $('#wcTable').innerHTML=h;
+  $$('#wcTable [data-wc]').forEach(el=>el.addEventListener('change',()=>{const j=+el.dataset.wc,f=el.dataset.f;let v=parseFloat(el.value)||0;if(f==='oee')v=Math.min(100,Math.max(1,v));par.wc[j][f]=v;changed();setTimeout(()=>{if(ui.view==='setup')renderSetup()},120)}));
+  $('#wcTable [data-plant]').addEventListener('change',e=>{par.plantFix=parseFloat(e.target.value)||0;changed();setTimeout(renderSetup,120)});
+  let c=`<thead><tr><th class="l">Category</th><th>Source</th><th>BOM % of price</th><th>Contract price %</th>${WCN.map(n=>`<th>${n}<br><span style="font-weight:400">run min</span></th>`).join('')}<th>Products</th></tr></thead><tbody>`;
+  CATS.forEach(k=>{const x=par.cats[k],b=BASE.cats[k];
+    c+=`<tr><td class="l"><span class="sw" style="background:${catColor(k)}"></span> ${k}</td><td><select data-cat="${k}" data-f="make" class="${x.make!==b.make?'chg':''}"><option value="1" ${x.make?'selected':''}>Make</option><option value="0" ${!x.make?'selected':''}>Buy</option></select></td>
+    <td><input type="number" step="0.5" data-cat="${k}" data-f="bom" value="${+x.bom.toFixed(2)}" class="${x.bom!==b.bom?'chg':''}"></td><td><input type="number" step="0.5" data-cat="${k}" data-f="cm" value="${+x.cm.toFixed(2)}" class="${x.cm!==b.cm?'chg':''}"></td>`+
+    x.min.map((m,w)=>`<td><input type="number" step="0.1" data-cat="${k}" data-f="min" data-w="${w}" value="${m}" class="${m!==b.min[w]?'chg':''}"></td>`).join('')+`<td>${PR.filter(p=>p.m===k).length}</td></tr>`});
+  $('#catTable').innerHTML=c+'</tbody>';
+  $$('#catTable [data-cat]').forEach(el=>el.addEventListener('change',()=>{const k=el.dataset.cat,f=el.dataset.f;if(f==='make')par.cats[k].make=el.value==='1';else if(f==='min')par.cats[k].min[+el.dataset.w]=Math.max(0,parseFloat(el.value)||0);else par.cats[k][f]=Math.max(0,parseFloat(el.value)||0);changed();setTimeout(()=>{if(ui.view==='setup')renderSetup()},120)}))}
+$('#resetWc').onclick=()=>{par.wc=clone(BASE.wc);par.plantFix=BASE.plantFix;changed();setTimeout(renderSetup,120);toast('Work centers reset')};
+$('#resetCat').onclick=()=>{par.cats=clone(BASE.cats);changed();setTimeout(renderSetup,120);toast('Categories reset')};
+
+/* scenarios */
+function renderScenarios(){const cols=[{name:'Baseline',T:RB.T,fixed:1},{name:'Current inputs',T:R.T,fixed:1},...saved.map((s,i)=>({name:s.name,T:run(Object.assign(clone(BASE),s.par)).T,i}))];
+  const rows=[['Units to build',t=>num(t.built)],['Station hours',t=>num(t.stH)],['Labor hours',t=>num(t.labH)],['Average utilization',t=>pct(t.avgUtil)],['Peak utilization',t=>pct(t.peak.v)+', '+WCN[t.peak.w]],['Months over capacity',t=>t.overMonths],['Overtime labor hours',t=>num(t.otH)],['Hours beyond overtime',t=>num(t.overH)],
+    ['Material',t=>usd(t.material)],['Contract manufacturing',t=>usd(t.cm)],['Regular labor',t=>usd(t.labor)],['Overtime',t=>usd(t.ot)],['Subcontract',t=>usd(t.sub)],['Overhead',t=>usd(t.voh+t.fix)],['Carrying cost',t=>usd(t.carry)],
+    ['Total manufacturing cost',t=>usd(t.total),1],['Cost per unit',t=>usd2(t.uc),1],['Revenue',t=>usd(t.rev)],['Revenue lost to capacity',t=>usd(t.lost)],['Gross margin',t=>pct(t.gm,1),1]];
+  let h=`<thead><tr><th class="l">Metric</th>${cols.map(c=>`<th>${c.name}${c.fixed?'':`<br><button class="btn small" data-load="${c.i}">Load</button> <button class="btn small" data-del="${c.i}">Delete</button>`}</th>`).join('')}</tr></thead><tbody>`;
+  rows.forEach(([n,f,b])=>{h+=`<tr class="${b?'tot':''}"><td class="l">${n}</td>${cols.map(c=>`<td>${f(c.T)}</td>`).join('')}</tr>`});
+  if(!saved.length)h+=`<tr><td class="l" colspan="${cols.length}" style="color:var(--ink-2);padding:16px 8px">Name a scenario at the top and select Save scenario to add it here, or load a preset first.</td></tr>`;
+  $('#scnTable').innerHTML=h+'</tbody>';
+  $$('[data-load]').forEach(b=>b.onclick=()=>{const s=saved[+b.dataset.load];par=Object.assign(clone(BASE),clone(s.par));$('#scnName').value=s.name;changed();toast('Loaded '+s.name)});
+  $$('[data-del]').forEach(b=>b.onclick=()=>{const s=saved[+b.dataset.del];if(!confirm('Delete '+s.name+'?'))return;saved.splice(+b.dataset.del,1);LS.set('capmodel-scenarios-v1',saved);renderScenarios();toast('Deleted '+s.name)})}
+
+/* exports */
+function dl(name,rows){const esc=v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(esc).join(',')).join('\n')],{type:'text/csv'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+$('#expMonthly').onclick=()=>{const rows=[['Section','Line',...MONTHS]];rows.push(['Demand','Units demanded',...R.units.map(v=>v.toFixed(0))],['Demand','Units built',...R.built.map(v=>v.toFixed(0))]);
+  R.wc.forEach((o,w)=>rows.push(['Capacity',WCN[w]+' load h',...o.load.map(v=>v.toFixed(1))],['Capacity',WCN[w]+' regular capacity h',...o.capR.map(v=>v.toFixed(1))],['Capacity',WCN[w]+' utilization',...o.util.map(v=>v.toFixed(3))],['Capacity',WCN[w]+' overtime h',...o.ot.map(v=>v.toFixed(1))],['Capacity',WCN[w]+' beyond overtime h',...o.over.map(v=>v.toFixed(1))],['Labor',WCN[w]+' FTE needed',...R.fte[w].map(v=>v.toFixed(2))]));
+  CK.forEach(([k,n])=>rows.push(['Cost',n,...R.C[k].map(v=>v.toFixed(0))]));rows.push(['Cost','Total',...R.C.total.map(v=>v.toFixed(0))]);dl('capacity-monthly.csv',rows);toast('Monthly results exported')};
+$('#expProducts').onclick=()=>{const rows=[['SKU','Product','Category','Source','Units','Build min/unit','Labor min/unit','Material/unit','Contract mfg/unit','Labor/unit','Overtime/unit','Subcontract/unit','Variable OH/unit','Fixed OH/unit','Carrying/unit','Cost/unit','Price','Margin']];
+  R.pc.forEach(x=>{const b=x.built||1;rows.push([x.p.i,x.p.d,x.p.m,x.r.make?'Make':'Buy',x.units.toFixed(0),x.runMin.toFixed(2),x.labMin.toFixed(2),...[x.mat,x.cm,x.alloc.labor,x.alloc.ot,x.alloc.sub,x.alloc.voh,x.alloc.fix,x.carry].map(v=>(v/b).toFixed(2)),x.uc.toFixed(2),x.p.p.toFixed(2),x.margin==null?'':x.margin.toFixed(4)])});dl('unit-costs.csv',rows);toast('Unit costs exported')};
+
+syncRail();compute();
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{drawSpark();renderView()},150)});
+})();
+
+</script>
+<script>/* tell an embedding page (Squarespace iframe) how tall this page is */
+(function(){if(window.parent===window)return;let last=0;function send(){const h=Math.ceil(document.documentElement.scrollHeight);if(Math.abs(h-last)>2){last=h;parent.postMessage({type:'apdash-height',page:location.pathname,height:h},'*');}}
+new ResizeObserver(send).observe(document.body);window.addEventListener('load',send);setInterval(send,1500);})();</script>
+</body>
+</html>

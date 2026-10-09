@@ -1,0 +1,24 @@
+{
+ "roles": [
+  {
+   "title": "Registered Nurse",
+   "what": "registered nurse",
+   "where": "Memphis, TN"
+  },
+  {
+   "title": "Software Engineer",
+   "what": "software engineer",
+   "where": "Seattle, WA"
+  },
+  {
+   "title": "Financial Analyst",
+   "what": "financial analyst",
+   "where": "New York, NY"
+  },
+  {
+   "title": "Project Manager",
+   "what": "project manager",
+   "where": "Austin, TX"
+  }
+ ]
+}

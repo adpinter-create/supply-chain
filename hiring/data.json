@@ -1,0 +1,47 @@
+{
+ "weekly": {
+  "lastUpdated": "May 30, 2026",
+  "nextRefresh": "Mondays, 6:00 AM CT",
+  "kpis": [
+   {
+    "v": "4.3%",
+    "l": "U.S. unemployment (Apr 2026)",
+    "t": "\u25b2 up from ~4.0% in 2024",
+    "cls": "down"
+   },
+   {
+    "v": "6.9M",
+    "l": "Job openings (Mar 2026)",
+    "t": "\u25a0 flat \u2014 low-hire, low-fire",
+    "cls": "flat"
+   },
+   {
+    "v": "0.9",
+    "l": "Openings per unemployed worker",
+    "t": "\u25bc employer's market",
+    "cls": "down"
+   },
+   {
+    "v": "6.7 days",
+    "l": "Median wait for first response",
+    "t": "\u25b2 time-to-hire +24% since 2021",
+    "cls": "down"
+   }
+  ],
+  "changelog": [
+   {
+    "date": "May 30, 2026",
+    "lines": [
+     "Initial build. National backdrop: unemployment 4.3%, 6.9M openings, hires rate 3.5%, 0.9 openings per unemployed worker \u2014 an employer's market.",
+     "Sector split intact: healthcare +680.5k jobs YoY vs. federal government \u2212330k. Tech's Information sector is in its 16th straight month of losses.",
+     "Metro stress: Washington DC postings ~35% below 2020; Seattle ~\u221223%. Memphis & Kansas City remain the most candidate-favorable."
+    ]
+   }
+  ]
+ },
+ "live": {
+  "updated": null,
+  "roles": []
+ },
+ "bls": {}
+}
